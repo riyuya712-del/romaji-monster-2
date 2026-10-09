@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ローマジモンスター2</title>
+<script id="rm2-final-image-source">
+function rm2IsImageSource(value){
+ return typeof value==='string'&&(value.startsWith('data:image/')||/^\.\/(?:assets\/)?[a-zA-Z0-9_.-]+\.(?:png|jpe?g|webp|gif|svg)$/.test(value));
+}
+</script>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#dff4ff;color:#493b31}
@@ -708,10 +714,10 @@ z-index:90;opacity:0;pointer-events:none;transition:.22s ease}
 <style id="rm2-v382-question-length-layout">
 /* 長い単語・文章でもiPad横向きの中央欄に収まるよう自動調整 */
 #battle.rm2QuestionLong .kana{font-size:clamp(34px,5vw,52px)!important;line-height:1.15!important;max-width:340px;overflow-wrap:anywhere}
-#battle.rm2QuestionLong .typed{font-size:clamp(24px,3.4vw,34px)!important;max-width:340px;overflow-wrap:anywhere;word-break:break-all}
+#battle.rm2QuestionLong .typed{font-size:clamp(24px,3.4vw,34px)!important;width:100%!important;max-width:100%!important;overflow-wrap:anywhere;word-break:break-all}
 #battle.rm2QuestionSentence .problem{min-width:0!important}
 #battle.rm2QuestionSentence .kana{font-size:clamp(22px,3vw,34px)!important;line-height:1.3!important;max-width:350px;white-space:normal;overflow-wrap:anywhere}
-#battle.rm2QuestionSentence .typed{font-size:clamp(18px,2.6vw,28px)!important;line-height:1.25!important;max-width:350px;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+#battle.rm2QuestionSentence .typed{font-size:clamp(18px,2.6vw,28px)!important;line-height:1.25!important;width:100%!important;max-width:100%!important;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
 #battle.rm2QuestionLong #hintBox,#battle.rm2QuestionSentence #hintBox{overflow-wrap:anywhere;word-break:break-all}
 @media(max-width:800px){
  #battle.rm2QuestionLong .kana{font-size:34px!important;max-width:260px}
@@ -787,7 +793,7 @@ z-index:90;opacity:0;pointer-events:none;transition:.22s ease}
   }
 }
 @media (min-width:801px){
-  #battle .typed{
+  #battle:not(.rm2QuestionLong):not(.rm2QuestionSentence) .typed{
     width:auto !important;
     min-width:82px !important;
     max-width:150px !important;
@@ -1462,8 +1468,8 @@ TRAINING  Training
 </div>
 
 <script>
-const MAP1_STAGE11_DARK_SLIME='assets/rm2_e3fad89e6a21346f6e392fa7f0fc4292164d8cdc504124f38c1e9357a9b1d9e9.png';
-const MAP1_STAGE11_NORMAL_SLIME='assets/rm2_53b49f50db7d739e61a97b213e129f65c1577e2de48ed9515f9732ab7b44310b.png';
+const MAP1_STAGE11_DARK_SLIME='./rm2_image_001.png';
+const MAP1_STAGE11_NORMAL_SLIME='./rm2_image_002.png';
 
 "use strict";
 
@@ -1941,8 +1947,8 @@ const MonsterDex={
 
   // 既存セーブの救済。通常KISEKIルート完了済みなら合体を見ている。
   if(p.finalRoute==="KISEKI"||p.normalEndingCleared===true)p.specialDex.fusionSeen=true;
-  // 遺跡の解放だけでは未発見。実際の発見記録かTRUE ENDから旧セーブを救済する。
-  if(p.finalRoute==="TRUE"||p.trueEndingCompleted===true||p.discoveredMonsters.includes("secret_boss"))p.specialDex.fallenAngelSeen=true;
+  // SECRET/TRUEまで到達済みなら堕天使には出会っている。
+  if(p.finalRoute==="SECRET"||p.finalRoute==="TRUE"||p.trueEndingCompleted===true)p.specialDex.fallenAngelSeen=true;
 
   if(p.specialDex.fusionSeen && !p.discoveredMonsters.includes("fusion_light"))p.discoveredMonsters.push("fusion_light");
   if(p.specialDex.fallenAngelSeen && !p.discoveredMonsters.includes("secret_boss"))p.discoveredMonsters.push("secret_boss");
@@ -2813,7 +2819,7 @@ const MonsterScreen={
   document.getElementById("monsterIcon").textContent=Evolution.icon(id);
   document.getElementById("monsterName").textContent=m.name;
   document.getElementById("monsterAttr").textContent=m.attribute;
-  document.getElementById("monsterLevel").textContent=`Lv.${Math.min(99,GameState.level)}`;
+  document.getElementById("monsterLevel").textContent=`Lv.${GameState.level}`;
   document.getElementById("monsterHP").textContent=Math.round(stats.maxHP);
   document.getElementById("monsterAttack").textContent=Math.round(stats.attack);
   Evolution.render(id);
@@ -4585,7 +4591,7 @@ const Story={
   Screens.show("eventScene");
   EventScene.showKing();
   EventScene.showHero();
-  EventScene.dialogue(this.lines(),()=>Screens.show("starter"));
+  EventScene.dialogue(this.lines(),()=>{GameState.progress.openingSeen=true;Screens.show("starter");});
  },
  render(){},
  next(){}
@@ -6343,56 +6349,56 @@ document.addEventListener("click",()=>setTimeout(()=>{
 
 /* v268 画像アセット統合：ユーザー提供画像を1ファイル内へ埋め込み */
 const RM2_ASSETS={
- title:"assets/rm2_51971e9fe71377368edac46291949cd59a9fd4ac6d407a2074d9942a8eb61c10.jpg",castle:"assets/rm2_1094cd160cda9f77dabea1d4c79a5d744c9ef97304e95a33b9fdadc78aedbdc7.jpg",heroBoy:'assets/rm2_f97cdcf965f12947a2b7a8d2d8694a69153055daea956842c46d9888f7436a71.webp',heroGirl:'assets/rm2_15a602fabf0be73151a40f2e21d430c248a4e6be29dd77f01a40bd6497578113.webp',king:"assets/rm2_2deb6cff984e38b64e55bbaa1d35c0999a4f08c2fb5b83b52619cabc3abee8c5.webp",
- fire1:'assets/rm2_cff7e1140d1eda4d9c7ec6494bf41a7419f97c675c0f76cfd9e0e48a81bcda81.webp',fire2:'assets/rm2_5a749087ecd0c733b7fe4cdc5ddca0ebaf52f2c871e406e4756083040e5b9396.webp',fire3:'assets/rm2_3b2bed329a1e9d05134882767f9ebc6b86c32781851ad1478192ef2553da58ef.png',
- water1:'assets/rm2_55f26d11356600b3d1fbab08885f16e7a84c9f690008c89d2974b582722da10a.webp',water2:'assets/rm2_63b9a146227e487c37842664df45748a92c235f1a6e3ca19cb6bae59977760bb.webp',water3:'assets/rm2_363b1e341c5af700a3d48c4cfebe00c2e55c0882a9ee984f48d44661a8eaf361.webp',
- grass1:'assets/rm2_7b78dfbbab706ab048d4f95a9c9cfbbba862caa825f6c0e04fe18a890183c5ad.webp',grass2:'assets/rm2_9b79ebe7c7c5032977bc27bd8fde7349083b3abe7fcfb77a1935451715c17f16.webp',grass3:'assets/rm2_8881b14b901a11f4903303de7a9552e7396e5c23dc74ba0a8b5f3325c2349633.webp',
- thunder1:"assets/rm2_a6ae8a957dde8054224dc9c708e6c599d60595daa1ef226b3e80c7ab6357d5d6.webp",thunder2:"assets/rm2_ea85558499c94a0d644ecc594cafef2e1ce018af90efe611fb4741d17383a724.webp",thunder3:"assets/rm2_e245efd779d563ae9c9c3c218b33c9ad11b1bd982ffbe8b721e51b81b9e554ca.webp",
- bg1:"assets/rm2_0aa2f6e82e5144698241cf4a5022b44ff15e3c5fec41cab4044360dcce469988.jpg",bg1Boss:"assets/rm2_8be7ff0341752d1b37074e4d002c9fa9a368f70d51347b35c4031ece4ed1bea0.jpg",bgFire:"assets/rm2_3fd5788107d5604085df53b81c14c2ee71aeadeab840200333fc82215992e0b8.jpg",bgFireBoss:"assets/rm2_1741f951a6be65769b4edc22e17f9cd0f0682c0d4fdb8f564a617f5edf0ce0cb.jpg",
- bgWater:"assets/rm2_29f119af7d66110d45260983b0910c29a564ce0e0477a11834782af6b7a60a78.jpg",bgWaterBoss:"assets/rm2_7bcaa6da0975e7d710a5a3efeca29de98ed36343e45fe9ac43dfaddbaac8ae54.jpg",bgGrass:"assets/rm2_68930d14cfc2280f090282ad7b00f05cdb2fdd381cf34fe44d30b0b7ecf28ba8.jpg",bgGrassBoss:"assets/rm2_fd5b1eb01deb38325c6b1fee13859c7da5a2fd20fbc7d835dccdd1f83a97352b.jpg",
- bgThunder:"assets/rm2_8a808f2c97077b910f20ea971a751602859691293df40e217011fe15def5c9ee.jpg",bgThunderBoss:"assets/rm2_94d8e63270794dc077f7e922282bbffd1d655607a3395b94f68b3f099201af04.jpg",bgEarth:"assets/rm2_9ba7f19e985719134eaac91eb8eccf859cbe5b3c2c9fe2e93b0362b2b7a2905d.jpg",bgEarthBoss:"assets/rm2_d2c004cdacab742ff21e27669a52a9a9c742eb28290c99c30513b107e7ecfd2e.jpg",
- n11:"assets/rm2_adbfa4652292f9b50aea3fb6393b6b98ff4c11c6fe7aac67f4fe15de77e5d5ff.webp",c11:"assets/rm2_0689bc0861506a2c2acff1c0ed51a1afa11b2afe8017a428c67a85181e58a397.webp",n12:"assets/rm2_1125fc2ffe6827b1c63aba6c3b4839309e72cde926d2af13b55d8f4b889ba1da.webp",c12:"assets/rm2_8fd6f86eab9410f837fb9221b1b0d3bf56a82384ffa229d59a4c113392899071.webp",n13:"assets/rm2_f61e33b24e140109d66e69b63ac7d2f622cea9e531158c7ef22fb700e05c6b5a.webp",c13:"assets/rm2_4af842b7ef35604d5cd6bd63eee386a9c981e4c9a05a563b4021232a86396d6f.webp",n14:'assets/rm2_c7c38d03d910f929afab9a058893ca75c8edfeb2208c5ddc04823a8be981d128.webp',c14:'assets/rm2_1d7e9f02c3a216f3a06d6ace8ab5ec8605bd882720dee57f3e3ac2f079c6bf6d.webp',
- n1b:'assets/rm2_80c71d8a69a389ee8badd34549547d58e6a26f5699998ffc95cc774e63f8dd69.webp',c1b:'assets/rm2_e24e9646909c7e09b88a108fa38b187689d55afea09282a821e6d0d32e715a57.webp',
- wf1:"assets/rm2_462a94129e9df3d60fb814b818a4ab2de9a2815c094d43456fdd3364bbef14d8.webp",cf1:"assets/rm2_5990e96695fed9175b795d175d4df5c6c8042b3a27d83ad0ee9eaeab3dccf5e7.webp",wf2:"assets/rm2_0efaccd7666a55880e06723e504a1c57e79751b8c3aa00026ed71c92e7c957e6.webp",cf2:"assets/rm2_161cc89c1dc5392b66b206d466b93c3f58c95a206266d277382360e68b96a11b.webp",wf3:"assets/rm2_ac50be3d53c53f7dd2381e9356d36b089529ad9dfaf2a72fdc8d3fce322acdb3.webp",cf3:"assets/rm2_4da6d59411cbedbbcd317ff1e76394c0b5ec4894bb5d6d05c9f7381435f70e10.webp",wf4:"assets/rm2_af46aff1d5eb4eae61c50ec6d2defc39019c0f261fb76ca63dbb660f0207e592.webp",cf4:"assets/rm2_b922eaf03f3fdc32e40b4683894c3cb7821e4e18028629da1920bad927e5ad56.webp",wfb:"assets/rm2_888b832bf10869ac4eed71fa13bb88920493e0d1cd7d50ab79afa56769895f25.webp",cfb:"assets/rm2_2fd8a46f0932921f5838d6d991be6a5ebcc5b43ee0f02b6a2ee8db23a43c1712.webp",
- ww1:"assets/rm2_113796ab906405a87582a9118e7bfac0f5c6516815773cb2e1b3c763988402fa.webp",cw1:"assets/rm2_3cf75ef2ddf065df86d34d22ddaaa9af6d42c4ebf80aef8aa2cd5668e7ce9bf8.webp",ww2:"assets/rm2_0f2f824a423aacfebe533f6108a7c6bef7fb8748ee1ef591a32bc9f9551f6df7.webp",cw2:"assets/rm2_6f88e84efe926a7177aa01437f3be4e4d94ffd4bacfd436dd843957b72c8dd25.webp",ww3:"assets/rm2_ad456e83a9aa1c1eda7892bf89d286896c4dcf65b89a94514c890f8052020383.webp",cw3:"assets/rm2_568e3e9ce577525a116cec305c87fefafab53c9a6020d3bc784eee2db9e42edf.webp",ww4:"assets/rm2_8726c27287b017072fc2d23d3b6bdc162b5f83312579aa576245dc2bba8715af.webp",cw4:"assets/rm2_1917d19be253b2779054bc021e9f42ab9fea7c4f71c24d04e2d2fbaa9544e518.webp",wwb:"assets/rm2_fed69d2f4a25d7b866e67b77d4810e8659aed0bacf901a02892c1b32889b9f4a.webp",cwb:"assets/rm2_373125e696aa8cf8f03bf6f267ba02079669dadb9ea793f6c95e439b4d9b5fae.webp",
- wg1:'assets/rm2_d6a4ade7f3d9cfbdd3f76c20a74439c47e4c70cef90faaa89bfda59e8f834943.webp',cg1:'assets/rm2_c499072f01da292e4df358fe3df78c481d1382711ba93b54fa6053786f74232d.webp',wg2:'assets/rm2_7f2646e832f08147cd603c19f57d7ec574a7614e8b00eaecafe281970b782753.webp',cg2:'assets/rm2_662f6f1a62a2405d8a64e80074b0cd532abe1f7dd9d22ccb2b5128f57b4189c4.webp',wg3:'assets/rm2_568b89db1b9d3e49655a54ec0b5d270d5a2b48e6a7f4f7beb1a8e631e32138bc.webp',cg3:'assets/rm2_66d5ece6e6a4161c4b7d8fa4f552792ca264896fe788a5695ff1338a383163d7.webp',wg4:'assets/rm2_aa2fa70d82c1e2035272633754e15575e6be8a728ff7317bee182f16f1f8b202.webp',cg4:'assets/rm2_41f6c0835f01af12f17fb432a298ae251fdf8dfe8c27079a2cb489e6c2fed2e5.webp',wgb:'assets/rm2_6e9dd741762b3d49cc1a6d73fa4414d08697341045ada38c49d29dd71ce6710c.webp',cgb:'assets/rm2_5230d070a1cc7c7d94354079c2691e08e16108fe26e3f3107e5fb1f63a68be09.webp',
- wt1:"assets/rm2_a110025788f9eaf2720297e52d66cdfa8b069048f90557ae193f258f1e699e67.webp",wt2:"assets/rm2_81f572ca8de615f7bf2fdd047641a2577ee9a09fe499891212e323245c75e86a.webp",wt3:"assets/rm2_10ef05e9e1124167d42a9e467ede9075dd244058dc7352e57d39e1f16f92f62b.webp",wt4:"assets/rm2_d9d968e03b454b442ac2c7e40962bb8e987330ecaf182044dde0711c2e618aad.webp",wtb:"assets/rm2_bd19bf602b7b704ee3b6ccbd9fd1a010f34fe7b7de381b253be0b6099d8c30fe.webp",ctb:"assets/rm2_6b016ed7dfa0bc2fe2eaa2f09b67fb16c0b997e6b34b307b8020abb255b51ce6.webp",
- we1:"assets/rm2_123aef43491df7a5238229bfacd7a524bc59f5b54cfc72980286773b9beecb73.webp",ce1:"assets/rm2_a9b2518a2f1d82bd4d02e974913d5fc90068bd880970256ed7a77808b1116b90.webp",we2:"assets/rm2_74b858990ce27b3b4d9942232426b1a7a52f5c144fed037b32e6c8545d83e050.webp",ce2:"assets/rm2_61b28538a33f1beb37a110d8de1e80895f363197ee1e716f41f76debd8e9b605.webp",we3:"assets/rm2_165c6c16911960a9679a4396b42f23a5a24baf41ee7fdcca12e9b8ecd308ec7b.webp",ce3:"assets/rm2_dda5101c9ba437dea54375c70e9fac8b57c84d980090f135ae33106e1caa976f.webp",we4:"assets/rm2_8afc44f8e466c1a603d779e48c940dcd5f38f20a36f7bdc65c89948e1b6d2ca2.webp",ce4:"assets/rm2_388c966fc8a188ad327f60fbb71caebb7ab02c77c41d0b74c45d6de939475792.webp",web:"assets/rm2_da50c7b69a5df54c725a969ef8496a91ec08d592e1eb41a8c25481926919dd21.webp",ceb:"assets/rm2_1b784f2d911a2b62dc3235471d41bf126934e8a9727318a05cb79fe541b74cc4.webp",
- trainingBg:"assets/rm2_7f433540eebf5c2bfe88e3badf451e0442b7e582b5b54eaf68482e0b875bcd18.jpg",
- trainingScarecrow:"assets/rm2_0422d202b3a912f0a15c2be38c3fae9a82f9e3ffd6ff832cdfb545edd414fddf.webp",
- map7_1:"assets/rm2_a0b1908bf9ad0b15fe496beafa964e82cae03824579cb958132b4a24edffd9ea.webp",
- map7_2:"assets/rm2_3c09722efbca56753f42d5d671c9a487a1307233e89368c1fd6901d4521dcfd8.webp",
- map7_3:"assets/rm2_1f8ad464dcb72d163d0301b737d6d593ff6ab11bcb0d56e4221263f3915efd32.webp",
- map7_4:"assets/rm2_f8a1091a0df8b23200951939268be9d11d1d1d724f2e95e154c04ce1a1ae9b03.webp",
- map7_5:"assets/rm2_ce55b294d873ca0a3c6d16d2fcce9633e1b92eb30f8353e33b0a41d47ee0f3ff.webp",
- map7_6:"assets/rm2_ff6dafb1f4b32e6bd72dd1068a5ba714a4769ee4ddf2138a8321739b2fdf31b4.webp",
- map7_7:"assets/rm2_1a614b33925ea31e8dab212755815622e6f404b7bb2e54b8961fcdde7bc1fef3.webp",
- map7_8:"assets/rm2_6d434ce82e1a36dd7102a7251579365120528bce4276e749098aee44fab30458.webp",
- map7_9:"assets/rm2_460c5451cb25781349011be929a358dabd845851dd96bdfd78b1cc1c011fd477.webp",
- map7_10:"assets/rm2_66803e4333b2715435a976eb8b74cead9ce05d18dedfd446df638bc482edf6cf.webp",
- secretBoss:"assets/rm2_692beeb28554cf6bd8ebf6040823d591421636589f307faaf1b26d8f71ae8982.webp",
- bgMap7:"assets/rm2_fd512a56e0288876d817d96a9f21545444e2abff8841bb7a4e6011c1aed2c97d.jpg",
- bgMap7Boss:"assets/rm2_cdec05b7ab16f50938d17ea2aa79960d7eaa2c25d94270826c783640fc5626e4.jpg",
- bgSecret:"assets/rm2_df1f3a92158bb619fb31190ae30dbac8b2ba98833a868a897d1b0082d521dfe0.jpg",
- tablet1:"assets/rm2_9571ef32976bcb1401ebf72f4946bce1ed76e84bf7dff3f79f0ef6bd279effbf.webp",
- tablet2:"assets/rm2_0a850c9cc9071c18bffcc7625afc292669cf9cda5fdcb1a320e41aa9da148d04.webp",
- tablet3:"assets/rm2_0dda2dda1a6513645b182efbec22e35c8b2a6044a7071eb593a17a6a99c78ccf.webp",
- tablet4:"assets/rm2_777ee6b35443f8441909f7e17b03017f649fac3accc5f41e11208c584c1a8795.webp",
- tablet5:"assets/rm2_1b72bdfc2a4edf2cdeab2e7cedef32638e689d40144dd3e306ae69ec548c7fe9.webp",
- tablet6:"assets/rm2_aa0b1507d70ce2d95d12d714fef615a17b27cf64a9f664f4b70d730c1ee32693.webp",
- tabletComplete:"assets/rm2_5acfaa0fef1afced74be3598a361897ae3445866792c2fd6766527e2d7f0ac31.webp",
- evoFire1:"assets/rm2_60caeb166424571492ec52f1b7b32812f1caa8950c616cf727516c24209e7371.webp",
- evoFire2:"assets/rm2_a93ecaec59c1cb27ca70e8c60b23698ec51913f3cf4e86a97f71c759c4c38c1f.webp",
- evoWater1:"assets/rm2_3f22184a892d7382c9dfa08b4ee24b9e574020f91d13e8c3c608167f4749f94d.webp",
- evoWater2:"assets/rm2_9f4a6fde2ecc50cca7e092d691398067b7443c59c8cac9d3b398ef0d065be132.webp",
- evoGrass1:"assets/rm2_cbb64d6cb4821ad4643ef7c4bdccea63985a2d56908c68c10145123d5d13a3c8.webp",
- evoGrass2:"assets/rm2_7951c90d8d5912d62215fc92f52aa74b16fc85f7ebf649bd8d54ec1372a86963.webp",
- evoThunder1:"assets/rm2_592ef88ccc16ad176a7d7f1797e31595fd35588959ed4b5504b0b25f7086f34a.webp",
- evoThunder2:"assets/rm2_f44fcbe49416fa8cba4160f4b9594126ac277d3d7db3445037bdcc846d704121.webp"
- ,ct1:"assets/rm2_68bcb14c6ae55887602c0a42260684bde1ab6bee5146b11e4577c77b4343d5ef.webp",
- ct2:"assets/rm2_645f27dbfd64a608cf49b5d0d6b796f19d4ea74c4629a5014000994aadbf9f97.webp",
- ct3:"assets/rm2_af80c68836d4e850e2424a36119dead1ea832a84668f04cf95f90988cd65643f.webp",
- ct4:"assets/rm2_e7efac192bc5e209dc0c9cda94a7dc7023b22b3847dd985faa350f53d89d2f0b.webp"
+ title:"./rm2_image_003.jpg",castle:"./rm2_image_004.jpg",heroBoy:'./rm2_image_005.webp',heroGirl:'./rm2_image_006.webp',king:"./rm2_image_007.webp",
+ fire1:'./rm2_image_008.webp',fire2:'./rm2_image_009.webp',fire3:'./rm2_image_010.png',
+ water1:'./rm2_image_011.webp',water2:'./rm2_image_012.webp',water3:'./rm2_image_013.webp',
+ grass1:'./rm2_image_014.webp',grass2:'./rm2_image_015.webp',grass3:'./rm2_image_016.webp',
+ thunder1:"./rm2_image_017.webp",thunder2:"./rm2_image_018.webp",thunder3:"./rm2_image_019.webp",
+ bg1:"./rm2_image_020.jpg",bg1Boss:"./rm2_image_021.jpg",bgFire:"./rm2_image_022.jpg",bgFireBoss:"./rm2_image_023.jpg",
+ bgWater:"./rm2_image_024.jpg",bgWaterBoss:"./rm2_image_025.jpg",bgGrass:"./rm2_image_026.jpg",bgGrassBoss:"./rm2_image_027.jpg",
+ bgThunder:"./rm2_image_028.jpg",bgThunderBoss:"./rm2_image_029.jpg",bgEarth:"./rm2_image_030.jpg",bgEarthBoss:"./rm2_image_031.jpg",
+ n11:"./rm2_image_032.webp",c11:"./rm2_image_033.webp",n12:"./rm2_image_034.webp",c12:"./rm2_image_035.webp",n13:"./rm2_image_036.webp",c13:"./rm2_image_037.webp",n14:'./rm2_image_038.webp',c14:'./rm2_image_039.webp',
+ n1b:'./rm2_image_040.webp',c1b:'./rm2_image_041.webp',
+ wf1:"./rm2_image_042.webp",cf1:"./rm2_image_043.webp",wf2:"./rm2_image_044.webp",cf2:"./rm2_image_045.webp",wf3:"./rm2_image_046.webp",cf3:"./rm2_image_047.webp",wf4:"./rm2_image_048.webp",cf4:"./rm2_image_049.webp",wfb:"./rm2_image_050.webp",cfb:"./rm2_image_051.webp",
+ ww1:"./rm2_image_052.webp",cw1:"./rm2_image_053.webp",ww2:"./rm2_image_054.webp",cw2:"./rm2_image_055.webp",ww3:"./rm2_image_056.webp",cw3:"./rm2_image_057.webp",ww4:"./rm2_image_058.webp",cw4:"./rm2_image_059.webp",wwb:"./rm2_image_060.webp",cwb:"./rm2_image_061.webp",
+ wg1:'./rm2_image_062.webp',cg1:'./rm2_image_063.webp',wg2:'./rm2_image_064.webp',cg2:'./rm2_image_065.webp',wg3:'./rm2_image_066.webp',cg3:'./rm2_image_067.webp',wg4:'./rm2_image_068.webp',cg4:'./rm2_image_069.webp',wgb:'./rm2_image_070.webp',cgb:'./rm2_image_071.webp',
+ wt1:"./rm2_image_072.webp",wt2:"./rm2_image_073.webp",wt3:"./rm2_image_074.webp",wt4:"./rm2_image_075.webp",wtb:"./rm2_image_076.webp",ctb:"./rm2_image_077.webp",
+ we1:"./rm2_image_078.webp",ce1:"./rm2_image_079.webp",we2:"./rm2_image_080.webp",ce2:"./rm2_image_081.webp",we3:"./rm2_image_082.webp",ce3:"./rm2_image_083.webp",we4:"./rm2_image_084.webp",ce4:"./rm2_image_085.webp",web:"./rm2_image_086.webp",ceb:"./rm2_image_087.webp",
+ trainingBg:"./rm2_image_088.jpg",
+ trainingScarecrow:"./rm2_image_089.webp",
+ map7_1:"./rm2_image_090.webp",
+ map7_2:"./rm2_image_091.webp",
+ map7_3:"./rm2_image_092.webp",
+ map7_4:"./rm2_image_093.webp",
+ map7_5:"./rm2_image_094.webp",
+ map7_6:"./rm2_image_095.webp",
+ map7_7:"./rm2_image_096.webp",
+ map7_8:"./rm2_image_097.webp",
+ map7_9:"./rm2_image_098.webp",
+ map7_10:"./rm2_image_099.webp",
+ secretBoss:"./rm2_image_100.webp",
+ bgMap7:"./rm2_image_101.jpg",
+ bgMap7Boss:"./rm2_image_102.jpg",
+ bgSecret:"./rm2_image_103.jpg",
+ tablet1:"./rm2_image_104.webp",
+ tablet2:"./rm2_image_105.webp",
+ tablet3:"./rm2_image_106.webp",
+ tablet4:"./rm2_image_107.webp",
+ tablet5:"./rm2_image_108.webp",
+ tablet6:"./rm2_image_109.webp",
+ tabletComplete:"./rm2_image_110.webp",
+ evoFire1:"./rm2_image_111.webp",
+ evoFire2:"./rm2_image_112.webp",
+ evoWater1:"./rm2_image_113.webp",
+ evoWater2:"./rm2_image_114.webp",
+ evoGrass1:"./rm2_image_115.webp",
+ evoGrass2:"./rm2_image_116.webp",
+ evoThunder1:"./rm2_image_117.webp",
+ evoThunder2:"./rm2_image_118.webp"
+ ,ct1:"./rm2_image_119.webp",
+ ct2:"./rm2_image_120.webp",
+ ct3:"./rm2_image_121.webp",
+ ct4:"./rm2_image_122.webp"
 };
 const RM2_COMPANION_IMAGES={fire:[RM2_ASSETS.fire1,RM2_ASSETS.fire2,RM2_ASSETS.fire3],water:[RM2_ASSETS.water1,RM2_ASSETS.water2,RM2_ASSETS.water3],grass:[RM2_ASSETS.grass1,RM2_ASSETS.grass2,RM2_ASSETS.grass3],map5new:[RM2_ASSETS.thunder1,RM2_ASSETS.thunder2,RM2_ASSETS.thunder3]};
 const RM2_ENEMY_IMAGES={
@@ -6522,8 +6528,8 @@ function rm2SetImageContent(el,src,alt){
  const oldPopup=EventScene.showRewardPopup.bind(EventScene);
  EventScene.showRewardPopup=function(title,icon,text,ms=1450){
   this.el("eventRewardPopup")?.querySelector(".rewardIcon")?.classList.remove("rm2RewardArt");
-  const promise=oldPopup(title,typeof icon==="string"&&(icon.startsWith("data:image/")||icon.startsWith("assets/rm2_"))?"":icon,text,ms);
-  if(typeof icon==="string"&&(icon.startsWith("data:image/")||icon.startsWith("assets/rm2_")))rm2SetImageContent(this.el("eventRewardPopup")?.querySelector(".rewardIcon"),icon,text);
+  const promise=oldPopup(title,rm2IsImageSource(icon)?"":icon,text,ms);
+  if(rm2IsImageSource(icon))rm2SetImageContent(this.el("eventRewardPopup")?.querySelector(".rewardIcon"),icon,text);
   return promise;
  };
  const oldMonsterV270=MonsterScreen.render.bind(MonsterScreen);
@@ -6994,17 +7000,14 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
  const isStage=()=>GameState.currentStage===boss && !GameState.progress?.secretBattleActive;
  const sceneIntro=Map7Flow.beforeBattle.bind(Map7Flow);
  Map7Flow.beforeBattle=function(stage,done){
-   if(stage!==boss||(GameState.progress?.ancientRuinsUnlocked&&!window.RM2_MEMORIES_TEST?.Replay.active))return sceneIntro(stage,done);
+   if(stage!==boss||GameState.progress?.ancientRuinsUnlocked)return sceneIntro(stage,done);
    // A previous KISEKI ending does not suppress this cutscene.  The SECRET unlock does.
    const hero=GameState.name||'主人公';
    return this.scene([
      {who:'魔王',text:'すべて、消し去ってくれる！'},
      {who:hero,text:'みんな、力を貸して！'},
      {who:'',text:'4体の仲間が、最後の戦いに挑む！'}
-   ],()=>{
-     StoryEventState.mark(stage,'intro');
-     done();
-   },'魔王・最終形態');
+   ],()=>{StoryEventState.mark(boss,'intro');done?.();},'魔王・最終形態');
  };
  const defaultStart=FinalBattle710.start.bind(FinalBattle710);
  FinalBattle710.start=function(){
@@ -7064,7 +7067,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
  Battle.renderHP=function(){
    hpRender();
    if(isStage()&&FinalBattle710.mode==='front')updateParty();
-   if(isStage()&&FinalBattle710.mode==='fusion'&&ui('allyHpText'))ui('allyHpText').textContent='光のモンスター　'+ui('allyHpText').textContent;
+   if(isStage()&&FinalBattle710.mode==='fusion'&&ui('allyHpText'))ui('allyHpText').textContent='ひかりのモンスター\n'+ui('allyHpText').textContent;
  };
  // During the first phase HP is represented by four separate units.  Each mistake
  // knocks one out, independent of level-dependent ally damage and timeouts.
@@ -7176,7 +7179,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
    const row=stoneLayer.querySelector('.stoneRow');
    const headingText=text=>{if(heading)heading.textContent=text;};
    const slate=document.createElement('div');slate.id='rm2FinalUnitedStone';
-   slate.innerHTML='<img src="assets/rm2_250c41de638d83422f27f158adccf60e6f53dd77b1f40deaab704f8cead0ee0e.png" alt="KISEKIの石板">';
+   slate.innerHTML='<img src="./rm2_image_123.png" alt="KISEKIの石板">';
    stoneLayer.appendChild(slate);
    const narration=document.createElement('div');narration.id='rm2StoneNarration';
    narration.setAttribute('role','status');world.appendChild(narration);
@@ -7385,7 +7388,8 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
 #preBattle.rm2Final710Pre #rm2Final710Challenge .challengers img{transform:scaleX(-1)!important;}
 /* Keep the successful word entry from showing a stale dialogue box. */
 #eventScene.rm2StoneResonance #eventDialogueBox{display:none!important;}
-#eventScene.rm2StoneResonance #eventHero{opacity:0!important;}
+#eventScene.rm2StoneResonance #eventHero,
+#eventScene.rm2StoneResonance #eventEnemy{opacity:0!important;}
 #rm2FinalStoneLayer .tablet{transition:transform 1.42s cubic-bezier(.2,.8,.2,1),opacity .45s ease;transform-origin:center center;}
 #rm2FinalStoneLayer.rm2StonesGathering .tablet{
   transform:translate(var(--stone-move-x),var(--stone-move-y)) rotate(var(--stone-rotation)) scale(.78);
@@ -7632,7 +7636,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
 </style>
 <script id="rm2-v340-normal-ending-script">
 (function(){
-  const FEATHER340=window.RM2_SECRET_FEATHER340='assets/rm2_bf8ed414e5a96f068a0aa512590fd0efeedc83301ab494b58ee5bbe212819be3.png';
+  const FEATHER340=window.RM2_SECRET_FEATHER340='./rm2_image_124.png';
   function rm2NormalEndCleanup340(){
     const scene=document.getElementById('eventScene');
     scene?.classList.remove('rm2NormalEnd340','rm2NormalEndFade340','rm2Final710Fusion');
@@ -7761,6 +7765,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   opacity:0;transition:opacity .65s ease,transform .65s ease;pointer-events:none;
 }
 #rm2NormalEndMark341.show{opacity:1;transform:translate(-50%,0)}
+#rm2NormalEndNext341{position:absolute;z-index:30;left:50%;bottom:8%;transform:translateX(-50%);min-width:160px;pointer-events:auto}
 
 @media(max-width:800px){
   #rm2NormalEndHero341{left:4%;bottom:23%;width:195px;height:230px}
@@ -7772,7 +7777,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
 </style>
 <script id="rm2-v341-normal-ending-script">
 (function(){
-  const FEATHER341='assets/rm2_a437084bcdf154e14fd2323c91ec821a4174f2037bed791b0f2ca43c314cbd20.png';
+  const FEATHER341='./rm2_image_125.png';
 
   function cleanup341(){
     const scene=document.getElementById('eventScene');
@@ -7781,6 +7786,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
     document.getElementById('rm2NormalEndParty341')?.remove();
     document.getElementById('rm2NormalEndFeather341')?.remove();
     document.getElementById('rm2NormalEndMark341')?.remove();
+    document.getElementById('rm2NormalEndNext341')?.remove();
   }
 
   function makeHero341(){
@@ -7824,7 +7830,14 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
         world.appendChild(mark);
         requestAnimationFrame(()=>requestAnimationFrame(()=>mark.classList.add('show')));
       },4300);
-      setTimeout(()=>{cleanup341();showAdventureV27();},6800);
+      setTimeout(()=>{
+        if(!scene.classList.contains('rm2NormalEnd341')||!scene.classList.contains('active'))return;
+        const next=document.createElement('button');
+        next.id='rm2NormalEndNext341';next.type='button';next.className='bigBtn show';
+        next.textContent='つぎへ';
+        next.onclick=()=>{next.disabled=true;cleanup341();showAdventureV27();};
+        world.appendChild(next);
+      },6800);
     },780);
   }
 
@@ -8121,13 +8134,11 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   '6-5':'マンモスの ボス','7-5':'おしろの ばんにん',
   '7-9':'まおうとの たたかい','7-10':'さいごの たたかい'
  };
- const noAfterStory=new Set(['7-1','7-2','7-3','7-4','7-6','7-8']);
  function seen(stage,part){
   const p=GameState.progress||{},keys=p.mapStorySeen||{};
   if(keys[`${stage}:${part}`])return true;
-  // 旧版では7-10の導入フラグがなかったが、クリア済みなら必ず見ている。
-  if(stage==='7-10'&&part==='intro')return (p.clearedStages||[]).includes(stage);
   if(stage.startsWith('1-') && part==='intro')return !!p.map1StorySeen?.[stage] || !!(p.clearedStages||[]).includes(stage);
+  if(stage==='7-10'&&part==='intro')return !!(p.clearedStages||[]).includes(stage)||p.specialDex?.fusionSeen===true;
   if(part!=='after')return false;
   if(stage==='1-2')return !!p.companionStorySeen?.second;
   if(stage==='1-3')return !!p.companionStorySeen?.third;
@@ -8145,6 +8156,8 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
  }
  function entries(){
   const list=[];
+  const progress=GameState.progress||{};
+  if(progress.openingSeen===true||(GameState.hero&&GameState.name&&GameState.starter))list.push({key:'opening:king',map:0,part:'opening',name:'おうさまとの はじまりのおはなし',type:'ぼうけんの まえ'});
   for(let map=1;map<=7;map++){
    for(let st=1;st<=(map===7?10:5);st++){
     const stage=`${map}-${st}`;
@@ -8152,10 +8165,11 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
      const introTitle=stage==='1-2'?'そうげんの ぼうけん':stage==='5-1'?'オオカミとの であい':(stageTopics[stage]||'ぼうけんの はじまり');
      list.push({key:`${stage}:intro`,map,stage,part:'intro',name:`${stage}　${introTitle}`,type:'たたかう まえ'});
     }
-    if(seen(stage,'after') && stage!=='7-10' && !noAfterStory.has(stage))list.push({key:`${stage}:after`,map,stage,part:'after',name:`${stage}　${stageTopics[stage]||'ぼうけんの つづき'}`,type:'たたかった あと'});
+    if(seen(stage,'after') && stage!=='7-10')list.push({key:`${stage}:after`,map,stage,part:'after',name:`${stage}　${stageTopics[stage]||'ぼうけんの つづき'}`,type:'たたかった あと'});
    }
   }
   const p=GameState.progress||{};
+  if(p.specialDex?.fusionSeen===true||p.normalEndingCleared===true)list.push({key:'7-10:fusion',map:7,stage:'7-10',part:'fusion',name:'7-10　KISEKIから がったいへ',type:'なかまの きせき'});
   if(p.normalEndingCleared===true)list.push({key:'ending:normal',map:7,part:'endingNormal',name:'エンディング　KISEKI',type:'おもいで'});
   if(p.ancientRuinsUnlocked===true)list.push({key:'ending:secret',map:7,part:'endingSecret',name:'こだいいせきへの みち',type:'おもいで'});
   if(p.trueEndingCompleted===true)list.push({key:'ending:true',map:7,part:'endingTrue',name:'TRUE END',type:'おもいで'});
@@ -8167,9 +8181,9 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
    try{if(typeof rm2SecretCleanup369==='function')rm2SecretCleanup369()}catch(_){}
    try{if(typeof rm2NormalEndCleanup340==='function')rm2NormalEndCleanup340()}catch(_){}
    const scene=el('eventScene'),world=el('eventWorld');
-   scene?.classList.remove('rm2NormalEnd341','rm2NormalEnd340','rm2SecretUnlock351','rm2SecretWall354','rm2SecretBoss369','rm2SecretBossDefeated373');
+   scene?.classList.remove('rm2StoneResonance','rm2ResonanceFullPower','rm2ResonanceBurst','rm2Final710Fusion','rm2Final710Story','rm2NormalEnd341','rm2NormalEnd340','rm2SecretUnlock351','rm2SecretWall354','rm2SecretBoss369','rm2SecretBossDefeated373');
    world?.classList.remove('rm2TrueEndLayout391');
-   ['rm2NormalEndHero341','rm2NormalEndParty341','rm2NormalEndFeather341','rm2NormalEndMark341','rm2NormalEndParty340','rm2NormalEndFeather340','rm2SecretWall354','rm2SecretCompleteSolo357','rm2FinalStoneLayer','rm2FinalWordGate','rm2MapMontage369','rm2TrueEndCard369','rm2TrueGuard369','rm2SecretFeather369'].forEach(id=>el(id)?.remove());
+   ['rm2NormalEndHero341','rm2NormalEndParty341','rm2NormalEndFeather341','rm2NormalEndMark341','rm2NormalEndNext341','rm2FinalResonanceParty','rm2StoneNarration','rm2FusionActor328','rm2NormalEndParty340','rm2NormalEndFeather340','rm2SecretWall354','rm2SecretCompleteSolo357','rm2FinalStoneLayer','rm2FinalWordGate','rm2MapMontage369','rm2TrueEndCard369','rm2TrueGuard369','rm2SecretFeather369'].forEach(id=>el(id)?.remove());
    if(world){world.style.backgroundImage='';world.style.backgroundSize='';world.style.backgroundPosition='';}
    try{EventScene.reset()}catch(_){}
   },
@@ -8183,6 +8197,12 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
     GameState.progress=original.progress;
     GameState.currentStage=original.stage;
     GameState.selectedCompanion=original.selectedCompanion;
+    GameState.storyIndex=original.storyIndex;
+    GameState.level=original.level;GameState.exp=original.exp;GameState.stars=original.stars;
+    GameState.hero=original.hero;GameState.name=original.name;GameState.starter=original.starter;
+    GameState.homeCharacter=original.homeCharacter;
+    Battle.start=original.battleStart;
+    FinalBattle710.resumeFusion=original.resumeFusion;
     FinalBattle710.endingStarted=original.endingStarted;
     FinalBattle710.mode=original.mode;
     FinalBattle710.active=original.finalActive;
@@ -8198,6 +8218,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   start(entry){
    if(this.active||!entries().some(x=>x.key===entry.key))return;
    const original={progress:GameState.progress,stage:GameState.currentStage,selectedCompanion:GameState.selectedCompanion,battle:GameState.battle,
+    storyIndex:GameState.storyIndex,level:GameState.level,exp:GameState.exp,stars:GameState.stars,hero:GameState.hero,name:GameState.name,starter:GameState.starter,homeCharacter:GameState.homeCharacter,battleStart:Battle.start,resumeFusion:FinalBattle710.resumeFusion,
     screensShow:Screens.show,saveWrite:Save.write,endingStarted:FinalBattle710.endingStarted,mode:FinalBattle710.mode,finalActive:FinalBattle710.active,finalRoute:FinalBattle710.route,finalMistakes:FinalBattle710.mistakes,finalFallen:FinalBattle710.fallen,encounterPending:Encounter.pending,encounterAfter:Encounter.pendingAfterV177};
    this.original=original;this.entry=entry;this.active=true;
    GameState.progress=JSON.parse(JSON.stringify(original.progress||{}));
@@ -8208,6 +8229,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
     p.clearedStages=(p.clearedStages||[]).filter(id=>id!==entry.stage);
     if(p.mapStorySeen)delete p.mapStorySeen[`${entry.stage}:intro`];
     if(p.map1StorySeen)delete p.map1StorySeen[entry.stage];
+    if(entry.stage==='7-10'){p.ancientRuinsUnlocked=false;p.secretBattleActive=false;}
    }else if(entry.part==='after'){
     const p=GameState.progress,stage=entry.stage,map=stage.split('-')[0];
     if(p.mapStorySeen)delete p.mapStorySeen[`${stage}:after`];
@@ -8219,6 +8241,8 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
    }
    Save.write=function(){};
    const self=this;
+   // The fusion cinematic ends at battle entry. A memory never starts combat.
+   Battle.start=function(){self.finish();};
    Screens.show=function(id){
     if(!self.active)return original.screensShow.call(this,id);
     if(id==='eventScene'||id==='dialogue')return original.screensShow.call(this,id);
@@ -8228,7 +8252,15 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
    el('rm2MemoryReplayTag')?.classList.add('show');
    try{
     const done=()=>self.finish();
-    if(entry.part==='intro'){
+    if(entry.part==='opening'){
+     Story.begin();
+    }else if(entry.part==='fusion'){
+     GameState.progress.secretBattleActive=false;
+     GameState.progress.ancientRuinsUnlocked=false;
+     GameState.progress.trueEndingCompleted=false;
+     FinalBattle710.endingStarted=false;FinalBattle710.active=false;
+     RM2_FINAL710_TEST.showTablets();
+    }else if(entry.part==='intro'){
      if(entry.stage.startsWith('1-')) Map1Flow.beforeStage(entry.stage,done);
      else MapStoryRouter.beforeBattle(entry.stage,done);
     }else if(entry.part==='after'){
@@ -8254,12 +8286,12 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   if(!viewed.length){
    const empty=document.createElement('p');empty.id='rm2MemoriesEmpty';empty.textContent='まだ おもいでは ありません。\nぼうけんを すると ここに ふえていくよ！';empty.style.whiteSpace='pre-line';list.append(empty);return;
   }
-  let lastMap=0;
+  let lastMap=-1;
   for(const item of viewed){
    if(item.map!==lastMap){
     lastMap=item.map;
     const group=document.createElement('div');group.className='rm2MemoryMap';group.dataset.map=String(lastMap);
-    const heading=document.createElement('h3');heading.textContent=`MAP ${lastMap}　${mapTitle(lastMap)}`;
+    const heading=document.createElement('h3');heading.textContent=lastMap===0?'ぼうけんの はじまり':`MAP ${lastMap}　${mapTitle(lastMap)}`;
     group.append(heading);list.append(group);
    }
    const group=list.lastElementChild;
@@ -9481,10 +9513,10 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
 #battle #enemyHpText,
 #battle #allyHpText {
   box-sizing:border-box !important;
-  display:table !important;
+  display:block !important;
   max-width:96% !important;
-  min-width:142px;
-  width:max-content;
+  min-width:0;
+  width:96%;
   margin:8px auto 0 !important;
   padding:5px 13px !important;
   border-radius:999px !important;
@@ -9498,7 +9530,8 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   letter-spacing:.2px !important;
   text-align:center !important;
   text-shadow:0 1px 2px #0008 !important;
-  white-space:nowrap !important;
+  white-space:pre-line !important;
+  overflow-wrap:anywhere;
   opacity:1 !important;
   position:relative !important;
   z-index:3 !important;
@@ -9507,7 +9540,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   #battle .arena > div > .hp {height:13px!important;margin-top:7px!important}
   #battle #enemyHpText,#battle #allyHpText {
     font-size:15px !important;
-    min-width:92px;
+    min-width:0;
     padding:4px 7px !important;
     margin-top:5px !important;
   }
@@ -9861,7 +9894,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
 <script id="rm2-v328-map7-fusion">
 (function(){
   window.RM2_LAYOUT_BUILD='v329_map7_fusion_faceoff';
-  RM2_ASSETS.rm2FusionLight = 'assets/rm2_82c45a6cb640477f7d9a7d217d2444357ca9c6721619403961f70f789cab9042.webp';
+  RM2_ASSETS.rm2FusionLight = './rm2_image_126.webp';
   let fusionObserver=null;
   function clearFusion(){
     fusionObserver?.disconnect();fusionObserver=null;
@@ -10200,7 +10233,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
 </style>
 <script id="rm2-v353-secret-unlock-script">
 (function(){
- const STONE351=window.RM2_KISEKI_STONE351='assets/rm2_250c41de638d83422f27f158adccf60e6f53dd77b1f40deaab704f8cead0ee0e.png';
+ const STONE351=window.RM2_KISEKI_STONE351='./rm2_image_123.png';
  function rm(id){document.getElementById(id)?.remove();}
  function cleanup(){
    const s=document.getElementById('eventScene');
@@ -10321,9 +10354,9 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
 </style>
 <script id="rm2-v354-secret-wall-script">
 (function(){
- const ODAI354='assets/rm2_7bbffac79cf14ba8b2b7167952121ff6e610c3e4d6be6a631c5fbd77cf4c5572.png';
- const FINAL354='assets/rm2_56caad0517e7b6ef025606dfbbc3b422c8ca27fe53863913cf210adff8fb859f.png';
- const KISEKI354='assets/rm2_250c41de638d83422f27f158adccf60e6f53dd77b1f40deaab704f8cead0ee0e.png';
+ const ODAI354='./rm2_image_127.png';
+ const FINAL354='./rm2_image_128.png';
+ const KISEKI354='./rm2_image_123.png';
  function rm(id){document.getElementById(id)?.remove();}
  function clear354(){
    const scene=document.getElementById('eventScene');
@@ -10948,7 +10981,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
    if(!special710){
     const hp=document.getElementById('allyHpText');
     if(hp && !hp.textContent.startsWith(CompanionNicknameV392.get(GameState.selectedCompanion)+'　')){
-     hp.textContent=CompanionNicknameV392.get(GameState.selectedCompanion)+'　'+hp.textContent;
+     hp.textContent=CompanionNicknameV392.get(GameState.selectedCompanion)+'\n'+hp.textContent;
     }
    }
    return result;
@@ -10982,6 +11015,10 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   'use strict';
   // 画面に表示された文だけ変える。セーブ、正解判定、ストーリー分岐、画像には触れない。
   const pairs = [
+    ['深まる','ふかまる'], ['声','こえ'], ['足あと','あしあと'],
+    ...['あ','か','さ','た','な','は','ま','や','ら','わ','が','ざ','だ','ば','ぱ'].map(k=>[k+'行',k+'ぎょう']),
+    ['中止','ちゅうし'], ['秒','びょう'], ['開始','はじめる'],
+    ['全て','すべて'], ['一覧','いちらん'], ['未発見','まだみつけていない'],
     ['クリアしたマップのつぎが見えるようになります。','マップをクリアすると、つぎのマップが見えるよ！'],
     ['ホームに表示するキャラ','ホームにひょうじするキャラ'],
     ['主人公や、出会ったモンスターから選べます。','しゅじんこうや、であったモンスターからえらべるよ。'],
@@ -11191,8 +11228,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
     if(!canEdit(node))return;
     const old=node.nodeValue;
     if(!/[\u3400-\u9fff]/.test(old))return;
-    // 数字につく助数詞を先に変換し、「4体の」が「4からだの」になるのを防ぐ。
-    let value=old.replace(/([0-9０-９]+)体/g,'$1たい');
+    let value=old;
     for(const [from,to] of pairs){if(value.includes(from))value=value.split(from).join(to);}
     value=value.replace(/第([1-9])(?:形態|進化)/g,(_,n)=>n+'だんかいめのしんか');
     if(value!==old)node.nodeValue=value;
@@ -11259,7 +11295,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
       const art=document.createElement('div');art.className='rm2ItemArt';
       if(has){
         const src=rm2TabletAsset(map);
-        if(typeof src==='string'&&(src.startsWith('data:image/')||src.startsWith('assets/rm2_'))){
+        if(rm2IsImageSource(src)){
           const img=document.createElement('img');img.src=src;img.alt='せきばんのかけら';art.appendChild(img);
         }else{art.textContent='🪨';}
       }else{
@@ -11290,5 +11326,166 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   if(RM2_ASSETS.trainingBg){
     screen.style.backgroundImage='linear-gradient(rgba(226,244,255,.26),rgba(225,243,255,.46)),url("'+RM2_ASSETS.trainingBg+'")';
   }
+})();
+</script>
+
+<!-- v393 / battle readability: visual feedback only; original combat calculations and art are unchanged. -->
+<style id="rm2-v393-battle-fx-css">
+#battle .hp>div,#battle .arena > div > .hp > div{transition:width .32s ease-out}
+#battle #damageNumber,#battle #allyDamageNumber{z-index:20;will-change:transform,opacity}
+#battle #damageNumber.rm2-fx-num,#battle #allyDamageNumber.rm2-fx-num{animation:rm2DamageFloat .66s ease-out both}
+#battle #damageNumber.rm2-fx-num{color:#a93027}
+#battle #allyDamageNumber.rm2-fx-num{color:#b12b50}
+#battle #damageNumber.rm2-fx-num[data-strength="3"],#battle #allyDamageNumber.rm2-fx-num[data-strength="3"]{font-size:49px!important;filter:drop-shadow(0 0 5px #ffb52a)}
+#battle #damageNumber.rm2-fx-num[data-strength="1"],#battle #allyDamageNumber.rm2-fx-num[data-strength="1"]{font-size:33px!important}
+@keyframes rm2DamageFloat{0%{opacity:0;transform:translate(-50%,15px) scale(.7)}16%{opacity:1;transform:translate(-50%,-4px) scale(1.1)}70%{opacity:1;transform:translate(-50%,-17px) scale(1)}100%{opacity:0;transform:translate(-50%,-26px) scale(.94)}}
+#battle .rm2-fx-attack{animation:rm2AllyAttack .42s cubic-bezier(.25,.85,.4,1)}
+#battle .rm2-fx-enemy-attack{animation:rm2EnemyAttack .42s cubic-bezier(.25,.85,.4,1)}
+#battle .rm2-fx-hit{animation:rm2HitReaction .46s ease-in-out}
+#battle .rm2-fx-hurt{animation:rm2AllyHurt .50s ease-in-out}
+#trainingBattle .rm2-fx-attack{animation:rm2AllyAttack .36s cubic-bezier(.25,.85,.4,1)}
+#trainingBattle .rm2-fx-hit{animation:rm2HitReaction .38s ease-in-out}
+@keyframes rm2AllyAttack{0%,100%{transform:translateX(0) scale(1)}34%{transform:translateX(-19px) scale(1.07)}60%{transform:translateX(-14px) scale(1.03)}}
+@keyframes rm2EnemyAttack{0%,100%{transform:translateX(0) scale(1)}35%{transform:translateX(17px) scale(1.07)}62%{transform:translateX(10px) scale(1.03)}}
+@keyframes rm2HitReaction{0%,100%{transform:translateX(0)}24%{transform:translateX(-9px)}45%{transform:translateX(7px)}66%{transform:translateX(-4px)}}
+@keyframes rm2AllyHurt{0%,100%{transform:translateX(0)}22%{transform:translateX(8px)}43%{transform:translateX(-7px)}67%{transform:translateX(4px)}}
+.rm2-v393-impact{--fx-color:#ffd54b;--fx-scale:1;position:absolute;pointer-events:none;left:50%;top:40%;width:100px;height:100px;z-index:18;transform:translate(-50%,-50%);isolation:isolate;animation:rm2FxImpact .5s ease-out both}
+.rm2-v393-impact:before{content:"";position:absolute;inset:5%;border:4px solid var(--fx-color);border-radius:50%;box-shadow:0 0 14px var(--fx-color),inset 0 0 14px var(--fx-color);animation:rm2FxRing .5s ease-out both}
+.rm2-v393-impact:after{content:attr(data-spark);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;text-shadow:0 0 14px var(--fx-color);animation:rm2FxSpark .45s ease-out both}
+.rm2-v393-impact[data-element="fire"]{--fx-color:#ff8036}
+.rm2-v393-impact[data-element="fire"]:before{background:radial-gradient(circle,#ff9d5480 0%,#ff803612 55%,transparent 75%)}
+.rm2-v393-impact[data-element="water"]:before{border-style:double;border-width:7px;box-shadow:0 0 7px #41cfff,inset 0 0 15px #41cfff}
+.rm2-v393-impact[data-element="grass"]:before{border-style:dashed;border-radius:28% 72% 34% 66%;transform:rotate(-25deg)}
+.rm2-v393-impact[data-element="thunder"]:before{border:0;border-radius:0;background:#ffe15a;clip-path:polygon(54% 0,25% 47%,48% 46%,33% 100%,76% 36%,53% 36%,75% 0);filter:drop-shadow(0 0 12px #f9d74b)}
+.rm2-v393-impact[data-element="light"]:before{border-width:5px;border-style:double;box-shadow:0 0 16px #fff4a5,inset 0 0 20px #fff4a5}
+.rm2-v393-impact[data-strength="1"]:after{font-size:28px}
+.rm2-v393-impact[data-strength="3"]:after{font-size:54px;text-shadow:0 0 16px var(--fx-color),0 0 25px var(--fx-color)}
+.rm2-v393-impact[data-element="water"]{--fx-color:#41cfff}
+.rm2-v393-impact[data-element="grass"]{--fx-color:#6ad16a}
+.rm2-v393-impact[data-element="thunder"]{--fx-color:#ffe15a}
+.rm2-v393-impact[data-element="light"]{--fx-color:#ffefac}
+.rm2-v393-impact[data-element="dark"]{--fx-color:#b391f6}
+.rm2-v393-impact[data-element="earth"]{--fx-color:#c9a779}
+.rm2-v393-impact[data-element="normal"]{--fx-color:#e5efff}
+.rm2-v393-impact[data-strength="1"]{--fx-scale:.6;opacity:.7}
+.rm2-v393-impact[data-strength="2"]{--fx-scale:1;opacity:.85}
+.rm2-v393-impact[data-strength="3"]{--fx-scale:1.35;opacity:1}
+.rm2-v393-impact[data-kind="hurt"]{--fx-color:#ff6979}
+@keyframes rm2FxImpact{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(var(--fx-scale))}}
+@keyframes rm2FxRing{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(1.65)}}
+@keyframes rm2FxSpark{0%{opacity:0;transform:scale(.5) rotate(-18deg)}25%{opacity:1;transform:scale(1.08) rotate(0)}100%{opacity:0;transform:scale(1.4) rotate(8deg)}}
+.rm2-v393-floating{position:absolute;z-index:22;left:50%;top:1%;transform:translateX(-50%);pointer-events:none;font-size:26px;font-weight:1000;color:#855623;text-shadow:0 1px 2px white,0 -1px 2px white;white-space:nowrap;animation:rm2TrainingFloat .55s ease-out both}
+@keyframes rm2TrainingFloat{0%{opacity:0;transform:translate(-50%,12px) scale(.8)}25%{opacity:1;transform:translate(-50%,-5px) scale(1)}100%{opacity:0;transform:translate(-50%,-24px)}}
+@media(prefers-reduced-motion:reduce){#battle .hp>div{transition:none}#battle .rm2-fx-attack,#battle .rm2-fx-enemy-attack,#battle .rm2-fx-hit,#battle .rm2-fx-hurt,#trainingBattle .rm2-fx-attack,#trainingBattle .rm2-fx-hit{animation:none}.rm2-v393-impact{display:none}#battle #damageNumber.rm2-fx-num,#battle #allyDamageNumber.rm2-fx-num{animation:none!important;opacity:1!important}}
+</style>
+<script id="rm2-v393-battle-fx-js">
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const glyph={fire:'🔥',water:'💦',grass:'🍃',thunder:'⚡',light:'✨',dark:'✦',earth:'◆',normal:'✦'};
+ const runCount=new WeakMap();
+ function replay(el,cls){
+   if(!el)return;
+   // Restart the animation for quick consecutive hits without relying on older timeouts.
+   el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);
+   const count=(runCount.get(el)||0)+1;runCount.set(el,count);
+   setTimeout(()=>{if(runCount.get(el)===count)el.classList.remove(cls);},cls==='rm2-fx-num'?720:550);
+ }
+ function markNumber(id,strength){
+   const el=$(id);if(!el)return;
+   el.dataset.strength=String(strength);
+   replay(el,'rm2-fx-num');
+ }
+ function elementType(){
+   try{return ElementSystem.battleAllyAttr()||'normal';}catch(e){return 'normal';}
+ }
+ function actualAttackPower(){
+   try{return Number(EvolutionStats.stats(GameState.selectedCompanion,GameState.level).attack)||10;}catch(e){return 10;}
+ }
+ function tier(amount,base){
+   const ratio=amount/Math.max(1,base);
+   return ratio>=1.05?3:(ratio>=.65?2:1);
+ }
+ function impact(target,element,strength,kind){
+   if(!target||!target.parentElement)return;
+   const parent=target.parentElement;
+   // Hit effects live beside the image, never inside it, to preserve all original PNGs.
+   if(getComputedStyle(parent).position==='static')parent.style.position='relative';
+   const mark=document.createElement('span');mark.className='rm2-v393-impact';
+   mark.dataset.element=element in glyph?element:'normal';mark.dataset.strength=String(strength);mark.dataset.kind=kind||'hit';
+   mark.dataset.spark=kind==='hurt'?'💥':glyph[mark.dataset.element];
+   parent.appendChild(mark);
+   setTimeout(()=>mark.remove(),600);
+ }
+ function frontParty(){return $('battle')?.classList.contains('rm2Final710Front');}
+ function attackTarget(){return frontParty()?($('rm2Final710Party')||$('allyIcon')):$('allyIcon');}
+ function hurtTarget(){
+   if(frontParty()){
+     const fallen=Array.from(document.querySelectorAll('#rm2Final710Party .rm2Final710Member.fallen'));
+     return fallen[fallen.length-1]||$('rm2Final710Party');
+   }
+   return $('allyIcon');
+ }
+ // Correct answer: use the existing real damage calculation and show one of 3 power tiers.
+ const oldCorrect=Battle.correct.bind(Battle);
+ Battle.correct=function(){
+   const b=GameState.battle;
+   const before=Number(b.enemyHP)||0;
+   const locked=!!b.questionLocked;
+   const result=oldCorrect();
+   if(locked||!$('battle')?.classList.contains('active'))return result;
+   // Displayed hit number remains the exact original damage, even on a finishing blow.
+   const printed=Number(($('damageNumber')?.textContent||'').replace(/[^0-9.]/g,''));
+   const damage=Number.isFinite(printed)&&printed>0?printed:Math.max(0,before-b.enemyHP);
+   if(damage<=0)return result;
+   const power=tier(damage,actualAttackPower());
+   const ally=attackTarget();
+   replay(ally,'rm2-fx-attack');
+   replay($('enemyIcon'),'rm2-fx-hit');
+   impact($('enemyIcon'),elementType(),power,'hit');
+   markNumber('damageNumber',power);
+   return result;
+ };
+ // Enemy answer-timeout and mistype: keep the original damage/party rules intact.
+ const oldEnemyAttack=Battle.enemyAttack.bind(Battle);
+ Battle.enemyAttack=function(){
+   const before=Number(GameState.battle?.allyHP)||0;
+   const isFront=frontParty();
+   const result=oldEnemyAttack();
+   // The special 7-10 first phase loses one party member rather than HP.
+   const after=Number(GameState.battle?.allyHP)||0;
+   const hit=isFront||after<before;
+   if(!hit||!$('battle')?.classList.contains('active'))return result;
+   const info=$('battleInfo');
+   if(info&&info.textContent==='ミス！')info.textContent='ミス！ ⚔️ てきの こうげき！';
+   replay($('enemyIcon'),'rm2-fx-enemy-attack');
+   replay(hurtTarget(),'rm2-fx-hurt');
+   if(!isFront){
+     const received=before-after;
+     let base=received;
+     try{base=Number(CombatBalance.enemy(GameState.currentStage,GameState.level).attack)||received;}catch(e){}
+     markNumber('allyDamageNumber',tier(received,base));
+   }
+   impact(hurtTarget(),ElementSystem.mapAttr(GameState.currentStage),isFront?2:tier(before-after,actualAttackPower()),'hurt');
+   return result;
+ };
+ // Practice scarecrow has no HP or counterattack, so show a clear success hit without inventing damage.
+ const oldTrainingKey=Training.key.bind(Training);
+ Training.key=function(ch){
+   const before=Number(this.correct)||0;
+   const result=oldTrainingKey(ch);
+   if(this.correct>before&&$('trainingBattle')?.classList.contains('active')){
+     replay($('trainingAllyIcon'),'rm2-fx-attack');
+     replay($('trainingTargetIcon'),'rm2-fx-hit');
+     impact($('trainingTargetIcon'),elementType(),2,'hit');
+     const host=$('trainingTargetIcon')?.parentElement;
+     if(host){
+       if(getComputedStyle(host).position==='static')host.style.position='relative';
+       const text=document.createElement('span');text.className='rm2-v393-floating';text.textContent='ヒット！';host.appendChild(text);
+       setTimeout(()=>text.remove(),600);
+     }
+   }
+   return result;
+ };
 })();
 </script>
