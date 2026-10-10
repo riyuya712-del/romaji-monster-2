@@ -2349,10 +2349,13 @@ return !!(s.hero&&s.name&&s.starter);}
    07 BATTLE SUPPORT / タイマー・入力判定
    ============================================================ */
 const BattleTimer={
- // MAP7の3つのBOSS戦のみ1問20秒。古代遺跡の専用戦は従来の10秒を維持。
+ // 古代遺跡の専用戦は30秒。MAP7の指定BOSS戦のみ20秒、それ以外は10秒。
  rules(){
+  if(GameState.progress?.secretBattleActive){
+   return {limit:30,hint1:5,hint2:10,hint3:15,answer:20};
+  }
   const stage=GameState.currentStage;
-  if((stage==="7-5"||stage==="7-9"||stage==="7-10") && !GameState.progress?.secretBattleActive){
+  if(stage==="7-5"||stage==="7-9"||stage==="7-10"){
    return {limit:20,hint1:5,hint2:10,answer:15};
   }
   return {limit:10,hint1:3,hint2:null,answer:5};
@@ -2362,7 +2365,9 @@ const BattleTimer={
   if(!marks)return;
   const r=this.rules();
   // 開始時・次問のたびに現在のステージ用の時間目盛りへ更新する。
-  if(r.limit===20){
+  if(r.limit===30){
+   marks.innerHTML="<span>5秒 ヒント①</span><span>10秒 ヒント②</span><span>15秒 ヒント③</span><span>20秒 こたえ</span><span>30秒 ⚔️</span>";
+  }else if(r.limit===20){
    marks.innerHTML="<span>5秒 ヒント①</span><span>10秒 ヒント②</span><span>15秒 こたえ</span><span>20秒 ⚔️</span>";
   }else{
    marks.innerHTML="<span>3秒 ヒント</span><span>5秒 こたえ</span><span>10秒 ⚔️</span>";
@@ -2400,7 +2405,12 @@ const BattleTimer={
   const q=GameState.battle.queue[GameState.battle.qIndex];
   if(!q)return;
   const upperHint=String(q[1]).toUpperCase();
-  if(r.limit===20){
+  if(r.limit===30){
+   // 古代遺跡: 5・10・15秒経過で段階的にヒント、20秒経過(残り10秒)で答え。
+   const third=upperHint.slice(0,Math.max(2,Math.ceil(upperHint.length/3)));
+   const twoThirds=upperHint.slice(0,Math.max(3,Math.ceil(upperHint.length*2/3)));
+   document.getElementById("hintBox").textContent=e>=r.answer ? "💡 こたえ："+upperHint : e>=r.hint3 ? "💡 ヒント③："+twoThirds+"…" : e>=r.hint2 ? "💡 ヒント②："+third+"…" : e>=r.hint1 ? "💡 ヒント①："+upperHint[0]+"…" : "\u00a0";
+  }else if(r.limit===20){
    // ヒント①: 最初の1文字、②: 前半分、15秒後: 完全なローマ字の答え。
    const half=upperHint.slice(0,Math.max(2,Math.ceil(upperHint.length/2)));
    document.getElementById("hintBox").textContent=e>=r.answer ? "💡 こたえ："+upperHint : e>=r.hint2 ? "💡 ヒント②："+half+"…" : e>=r.hint1 ? "💡 ヒント①："+upperHint[0]+"…" : "\u00a0";
@@ -4494,10 +4504,12 @@ const Battle={
   const player=EvolutionStats.stats(GameState.selectedCompanion,GameState.level),e=b.elapsed;
   b.attempts++;b.correctAnswers++;
   const timeRules=BattleTimer.rules();
-  // 7-5/7-9/7-10: 残り20～10秒は大、10～5秒は中、5秒以下は小。
-  // 通常ステージは従来の3秒/5秒判定と倍率 (1/.7/.4) を維持。
-  const fullDamageUntil=timeRules.limit===20?timeRules.hint2:timeRules.hint1;
-  let ratio=e<fullDamageUntil?1:e<timeRules.answer?.7:.4;
+  // 古代遺跡: 残り30～20秒=大、20～10秒=中、10秒以下=小。
+  // 7-5/7-9/7-10: 残り20～10秒=大、10～5秒=中、5秒以下=小。
+  // その他は従来の3秒/5秒判定と倍率 (1/.7/.4) を維持。
+  const fullDamageUntil=timeRules.limit===30?10:timeRules.limit===20?timeRules.hint2:timeRules.hint1;
+  const mediumDamageUntil=timeRules.limit===30?20:timeRules.answer;
+  let ratio=e<fullDamageUntil?1:e<mediumDamageUntil?0.7:0.4;
   if(e>=timeRules.hint1)b.hints++;
   const elementMultiplier=ElementSystem.multiplier(GameState.currentStage);
   const dmg=Math.round(player.attack*ratio*elementMultiplier);
@@ -4527,7 +4539,7 @@ const Battle={
   const b=GameState.battle;
   if(!b.running||b.questionLocked)return;
   b.questionLocked=true;
-  // 10秒に達した瞬間に止め、同じ問題で敵攻撃が重複しないようにする。
+  // 各戦闘の制限時間に達したら止め、同じ問題で敵攻撃が重複しないようにする。
   BattleTimer.stop();
   b.attempts++;b.mistakes++;b.review.push(this.current());
   document.getElementById("battleInfo").textContent="⚔️ てきの こうげき！";
@@ -11304,244 +11316,236 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
 </script>
 
 
-<!-- v393: 小学校3年生向け・表示専用のよみやすさ調整。ゲームデータは変更しない。 -->
-<script id="rm2-v393-easy-japanese">
+<!-- v394: 1・2年生の漢字を生かし、むずかしい語だけ安全に変える表示専用の調整。 -->
+<script id="rm2-v394-grade2-japanese">
 (()=>{
-  'use strict';
-  // 画面に表示された文だけ変える。セーブ、正解判定、ストーリー分岐、画像には触れない。
-  const pairs = [
-    ['クリアしたマップのつぎが見えるようになります。','マップをクリアすると、つぎのマップが見えるよ！'],
-    ['ホームに表示するキャラ','ホームにひょうじするキャラ'],
-    ['主人公や、出会ったモンスターから選べます。','しゅじんこうや、であったモンスターからえらべるよ。'],
-    ['これまでの問題で特訓しよう！','これまでのもんだいで、とっくんしよう！'],
-    ['これまでの問題にチャレンジ！','これまでのもんだいにチャレンジ！'],
-    ['完全攻略','ぜんぶクリア'],
-    ['進化アイテム','しんかアイテム'],
-    ['モンスター図鑑','モンスターずかん'],
-    ['図鑑','ずかん'],
-    ['遊び方','あそびかた'],
-    ['共通レベル','みんなのレベル'],
-    ['攻撃力','こうげきりょく'],
-    ['第3形態','3だんかいめのすがた'],
-    ['第2形態','2だんかいめのすがた'],
-    ['第1形態','1だんかいめのすがた'],
-    ['最終形態','さいごのすがた'],
-    ['最終決戦','さいごのたたかい'],
-    ['第3進化','3だんかいめのしんか'],
-    ['第2進化','2だんかいめのしんか'],
-    ['第1進化','1だんかいめのしんか'],
-    ['第3段階','3だんかいめ'],
-    ['第2段階','2だんかいめ'],
-    ['第1段階','1だんかいめ'],
-    ['古代遺跡','こだいいせき'],
-    ['魔王城','まおうじょう'],
-    ['闇の番人','やみのばんにん'],
-    ['正気を取り戻した','しょうきにもどった'],
-    ['正気を取り戻して','しょうきにもどって'],
-    ['正気','しょうき'],
-    ['異変','いへん'],
-    ['黒幕','くろまく'],
-    ['石板','せきばん'],
-    ['雷鳴','らいめい'],
-    ['堕天使','だてんし'],
-    ['魔王','まおう'],
-    ['主人公','しゅじんこう'],
-    ['王様','おうさま'],
-    ['相棒','あいぼう'],
-    ['冒険','ぼうけん'],
-    ['特訓','とっくん'],
-    ['進化','しんか'],
-    ['進む','すすむ'],
-    ['進んで','すすんで'],
-    ['進もう','すすもう'],
-    ['解放','かいほう'],
-    ['初めて','はじめて'],
-    ['初回','はじめて'],
-    ['最後','さいご'],
-    ['最初','さいしょ'],
-    ['仲間','なかま'],
-    ['属性','ぞくせい'],
-    ['設定','せってい'],
-    ['確認','かくにん'],
-    ['選ぶ','えらぶ'],
-    ['選べ','えらべ'],
-    ['選ん','えらん'],
-    ['入力','にゅうりょく'],
-    ['練習','れんしゅう'],
-    ['問題','もんだい'],
-    ['終了','おわり'],
-    ['変更','へんこう'],
-    ['追加','ついか'],
-    ['表示','ひょうじ'],
-    ['必要','ひつよう'],
-    ['会える','あえる'],
-    ['出会う','であう'],
-    ['出会い','であい'],
-    ['出会った','であった'],
-    ['出会える','であえる'],
-    ['場所','ばしょ'],
-    ['見える','みえる'],
-    ['見え','みえ'],
-    ['見て','みて'],
-    ['見た','みた'],
-    ['見せ','みせ'],
-    ['文字','もじ'],
-    ['意味','いみ'],
-    ['名前','なまえ'],
-    ['正式名','もとのなまえ'],
-    ['空欄','なにもかかない'],
-    ['書かれた','かかれた'],
-    ['書く','かく'],
-    ['書き','かき'],
-    ['草原','そうげん'],
-    ['火山','かざん'],
-    ['海岸','かいがん'],
-    ['高原','こうげん'],
-    ['荒野','こうや'],
-    ['水辺','みずべ'],
-    ['古代','こだい'],
-    ['世界','せかい'],
-    ['魔法','まほう'],
-    ['闇','やみ'],
-    ['光ってる','ひかってる'],
-    ['光って','ひかって'],
-    ['光った','ひかった'],
-    ['光る','ひかる'],
-    ['光ら','ひから'],
-    ['光り','ひかり'],
-    ['光','ひかり'],
-    ['雷','かみなり'],
-    ['電気','でんき'],
-    ['黒い','くろい'],
-    ['黒く','くろく'],
-    ['暗い','くらい'],
-    ['暗く','くらく'],
-    ['気配','けはい'],
-    ['影','かげ'],
-    ['力','ちから'],
-    ['戦う','たたかう'],
-    ['戦い','たたかい'],
-    ['戦って','たたかって'],
-    ['戦闘','バトル'],
-    ['勝て','かて'],
-    ['勝利','しょうり'],
-    ['強く','つよく'],
-    ['強い','つよい'],
-    ['強ま','つよま'],
-    ['助け','たすけ'],
-    ['危ない','あぶない'],
-    ['暴れ','あばれ'],
-    ['自分','じぶん'],
-    ['全部','ぜんぶ'],
-    ['大地','だいち'],
-    ['体','たい'],
-    ['羽','はね'],
-    ['帰ろう','かえろう'],
-    ['旅','たび'],
-    ['挑む','いどむ'],
-    ['生まれ','うまれ'],
-    ['終わっ','おわっ'],
-    ['始まり','はじまり'],
-    ['一枚','1まい'],
-    ['枚','まい'],
-    ['新しい','あたらしい'],
-    ['小さい','ちいさい'],
-    ['大きな','おおきな'],
-    ['大きい','おおきい'],
-    ['大きく','おおきく'],
-    ['小さな','ちいさな'],
-    ['前の','まえの'],
-    ['次の','つぎの'],
-    ['次へ','つぎへ'],
-    ['今まで','いままで'],
-    ['今の','いまの'],
-    ['何か','なにか'],
-    ['何が','なにが'],
-    ['何も','なにも'],
-    ['何者','なにもの'],
-    ['私','わたし'],
-    ['聞こえ','きこえ'],
-    ['聞く','きく'],
-    ['来た','きた'],
-    ['来る','くる'],
-    ['行こう','いこう'],
-    ['行って','いって'],
-    ['止め','とめ'],
-    ['消え','きえ'],
-    ['消す','けす'],
-    ['落ち','おち'],
-    ['頭','あたま'],
-    ['反応','はんのう'],
-    ['共鳴','きょうめい'],
-    ['合体','がったい'],
-    ['完成','かんせい'],
-    ['全身','ぜんしん'],
-    ['体が','からだが'],
-    ['体は','からだは'],
-    ['体の','からだの'],
-    ['姿','すがた'],
-    ['向こう','むこう'],
-    ['向け','むけ'],
-    ['扉','とびら'],
-    ['森','もり'],
-    ['正確','せいかく'],
-    ['正式','せいしき'],
-    ['明る','あかる'],
-    ['暗さ','くらさ'],
-    ['晴れ','はれ'],
-    ['守る','まもる'],
-    ['守っ','まもっ'],
-    ['使う','つかう'],
-    ['使って','つかって'],
-    ['得意','とくい'],
-    ['育ち','そだち'],
-    ['植物','しょくぶつ'],
-    ['葉','は'],
-    ['角','つの'],
-    ['調べ','しらべ'],
-    ['感じ','かんじ'],
-    ['待ち','まち'],
-    ['受け','うけ'],
-    ['選択','せんたく'],
-  ];
-  pairs.sort((a,b)=>b[0].length-a[0].length);
-  const excluded='#kana, #typed, #typingInput, #hintBox, #homeName, #monsterName, #preBattleSelectedName, #renameCurrent, #nameInput, #renameInput, #monsterRenameInputV392, #allyHpText, .rm2PreBattleChoiceName';
-  const ignoredTags=new Set(['SCRIPT','STYLE','TEXTAREA','NOSCRIPT','OPTION']);
-  const userName=()=>typeof GameState!=='undefined'&&GameState?.name||'';
-  function canEdit(node){
-    const parent=node.parentElement;
-    if(!parent||ignoredTags.has(parent.tagName)||parent.isContentEditable||parent.closest(excluded))return false;
-    // 登場人物の名前欄にプレイヤー自身の名前が出ていたらそのまま残す。
-    if(parent.id==='eventDialogueWho'&&node.nodeValue===userName())return false;
-    return true;
-  }
-  function replaceText(node){
-    if(!canEdit(node))return;
-    const old=node.nodeValue;
-    if(!/[\u3400-\u9fff]/.test(old))return;
-    let value=old;
-    for(const [from,to] of pairs){if(value.includes(from))value=value.split(from).join(to);}
-    value=value.replace(/第([1-9])(?:形態|進化)/g,(_,n)=>n+'だんかいめのしんか');
-    if(value!==old)node.nodeValue=value;
-  }
-  function walk(root){
-    if(root.nodeType===3){replaceText(root);return;}
-    if(root.nodeType!==1||ignoredTags.has(root.tagName))return;
-    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
-      acceptNode(node){return canEdit(node)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}
-    });
-    let node;
-    while((node=walker.nextNode()))replaceText(node);
-  }
-  // 画面に出る文字だけを更新。ゲーム本体の文字列／画像／セーブデータはそのまま。
-  const observer=new MutationObserver(mutations=>{
-    for(const m of mutations){
-      if(m.type==='characterData'){replaceText(m.target);continue;}
-      for(const node of m.addedNodes)walk(node);
-    }
+ 'use strict';
+ // 1・2年生で習う漢字（王・光・森・体・羽・力・電気・火山・高原など）はそのままにする。
+ // 単独の漢字を無条件に読みがなへ変換すると「体力→たいちから」等を起こすため禁止。
+ // 保存データ、入力の正解、画像、ストーリーのwho/text原文は一切変更しない。
+ const pairs=[
+    ["主人公や、出会ったモンスターから選べます。","しゅじんこうや、出会ったモンスターからえらべるよ。"],
+    ["これまでの問題で特訓しよう！","これまでのもんだいで、とっくんしよう！"],
+    ["これまでの問題にチャレンジ！","これまでのもんだいにチャレンジ！"],
+    ["ホームに表示するキャラ","ホームにひょうじするキャラ"],
+    ["正気を取り戻した","正気にもどった"],
+    ["正気を取り戻して","正気にもどって"],
+    ["モンスター図鑑","モンスターずかん"],
+    ["進化アイテム","しんかアイテム"],
+    ["共通レベル","みんなのレベル"],
+    ["待ち受ける","まちうける"],
+    ["古代遺跡","こだいいせき"],
+    ["完全攻略","ぜんぶクリア"],
+    ["待ち受け","まちうけ"],
+    ["最終形態","さいごのすがた"],
+    ["最終決戦","さいごのたたかい"],
+    ["第1形態","1だんかいめのすがた"],
+    ["第1段階","1だんかいめ"],
+    ["第1進化","1だんかいめのしんか"],
+    ["第2形態","2だんかいめのすがた"],
+    ["第2段階","2だんかいめ"],
+    ["第2進化","2だんかいめのしんか"],
+    ["第3形態","3だんかいめのすがた"],
+    ["第3段階","3だんかいめ"],
+    ["第3進化","3だんかいめのしんか"],
+    ["闇の番人","やみのばんにん"],
+    ["不正解","ふせいかい"],
+    ["主人公","しゅじんこう"],
+    ["使って","つかって"],
+    ["初めて","はじめて"],
+    ["危ない","あぶない"],
+    ["受け取","うけと"],
+    ["向こう","むこう"],
+    ["堕天使","だてんし"],
+    ["始まり","はじまり"],
+    ["戦って","たたかって"],
+    ["攻撃力","こうげきりょく"],
+    ["正式名","もとのなまえ"],
+    ["消し去","けしさ"],
+    ["深まる","ふかまる"],
+    ["申し訳","もうしわけ"],
+    ["終わっ","おわっ"],
+    ["経験値","けいけんち"],
+    ["者たち","ものたち"],
+    ["葉っぱ","はっぱ"],
+    ["貸して","かして"],
+    ["進もう","すすもう"],
+    ["進んで","すすんで"],
+    ["遊び方","あそびかた"],
+    ["魔王城","まおうじょう"],
+    ["お礼","おれい"],
+    ["一枚","1まい"],
+    ["世界","せかい"],
+    ["仲間","なかま"],
+    ["何者","なにもの"],
+    ["使う","つかう"],
+    ["倒し","たおし"],
+    ["倒す","たおす"],
+    ["倒れ","たおれ"],
+    ["全身","ぜんしん"],
+    ["全部","ぜんぶ"],
+    ["共鳴","きょうめい"],
+    ["冒険","ぼうけん"],
+    ["初回","はじめの"],
+    ["助か","たすか"],
+    ["助け","たすけ"],
+    ["勝つ","かつ"],
+    ["勝て","かて"],
+    ["勝利","しょうり"],
+    ["単語","たんご"],
+    ["反応","はんのう"],
+    ["受け","うけ"],
+    ["古代","こだい"],
+    ["各地","いろいろな場所"],
+    ["向け","むけ"],
+    ["問題","もんだい"],
+    ["回復","かいふく"],
+    ["図鑑","ずかん"],
+    ["報酬","ほうしゅう"],
+    ["場所","ばしょ"],
+    ["変更","へんこう"],
+    ["失敗","しっぱい"],
+    ["始め","はじめ"],
+    ["守っ","まもっ"],
+    ["守る","まもる"],
+    ["完成","かんせい"],
+    ["封じ","ふうじ"],
+    ["属性","ぞくせい"],
+    ["待ち","まち"],
+    ["得意","とくい"],
+    ["必要","ひつよう"],
+    ["意味","いみ"],
+    ["感じ","かんじ"],
+    ["成功","せいこう"],
+    ["戦い","たたかい"],
+    ["戦う","たたかう"],
+    ["戦闘","バトル"],
+    ["戻っ","もどっ"],
+    ["戻る","もどる"],
+    ["指定","してい"],
+    ["挑む","いどむ"],
+    ["挑戦","ちょうせん"],
+    ["攻撃","こうげき"],
+    ["敗れ","やぶれ"],
+    ["文章","ぶんしょう"],
+    ["暗い","くらい"],
+    ["暗く","くらく"],
+    ["暗さ","くらさ"],
+    ["暗闇","くらやみ"],
+    ["暴れ","あばれ"],
+    ["最初","さいしょ"],
+    ["最後","さいご"],
+    ["植物","しょくぶつ"],
+    ["次の","つぎの"],
+    ["次へ","つぎへ"],
+    ["正式","せいしき"],
+    ["正確","せいかく"],
+    ["正解","せいかい"],
+    ["残さ","のこさ"],
+    ["残っ","のこっ"],
+    ["残り","のこり"],
+    ["気配","けはい"],
+    ["水辺","みずべ"],
+    ["流れ","ながれ"],
+    ["浮か","うか"],
+    ["海岸","海がん"],
+    ["消え","きえ"],
+    ["消し","けし"],
+    ["消す","けす"],
+    ["準備","じゅんび"],
+    ["特訓","とっくん"],
+    ["状態","じょうたい"],
+    ["王様","王さま"],
+    ["画面","がめん"],
+    ["異変","いへん"],
+    ["発見","はっけん"],
+    ["相手","あいて"],
+    ["相棒","あいぼう"],
+    ["石板","せきばん"],
+    ["確認","かくにん"],
+    ["程度","ていど"],
+    ["種類","しゅるい"],
+    ["空欄","なにもかかない"],
+    ["突然","とつぜん"],
+    ["終わ","おわ"],
+    ["終了","おわり"],
+    ["結果","けっか"],
+    ["続い","つづい"],
+    ["続く","つづく"],
+    ["練習","れんしゅう"],
+    ["育ち","そだち"],
+    ["能力","のうりょく"],
+    ["荒野","こうや"],
+    ["落ち","おち"],
+    ["葉が","はっぱが"],
+    ["葉の","はっぱの"],
+    ["葉を","はっぱを"],
+    ["表示","ひょうじ"],
+    ["解放","かいほう"],
+    ["設定","せってい"],
+    ["調べ","しらべ"],
+    ["追い","おい"],
+    ["追っ","おっ"],
+    ["追加","ついか"],
+    ["進む","すすむ"],
+    ["進化","しんか"],
+    ["選ぶ","えらぶ"],
+    ["選べ","えらべ"],
+    ["選ん","えらん"],
+    ["選択","せんたく"],
+    ["関係","かんけい"],
+    ["雷鳴","らいめい"],
+    ["魔法","まほう"],
+    ["魔王","まおう"],
+    ["黒幕","くろまく"],
+    ["奥","おく"],
+    ["姿","すがた"],
+    ["影","かげ"],
+    ["扉","とびら"],
+    ["敵","てき"],
+    ["旅","たび"],
+    ["枚","まい"],
+    ["私","わたし"],
+    ["闇","やみ"],
+    ["雷","かみなり"],
+ ];
+ const excluded='#kana, #typed, #typingInput, #hintBox, #homeName, #monsterName, #preBattleSelectedName, #renameCurrent, #nameInput, #renameInput, #monsterRenameInputV392, #allyHpText, .rm2PreBattleChoiceName, #homeCharacterList';
+ const ignoredTags=new Set(['SCRIPT','STYLE','TEXTAREA','NOSCRIPT','OPTION']);
+ const userName=()=>typeof GameState!=='undefined'&&GameState?.name||'';
+ function canEdit(node){
+  const parent=node.parentElement;
+  if(!parent||ignoredTags.has(parent.tagName)||parent.isContentEditable||parent.closest(excluded))return false;
+  if(parent.id==='eventDialogueWho'&&node.nodeValue===userName())return false;
+  return true;
+ }
+ function replaceText(node){
+  if(!canEdit(node))return;
+  const old=node.nodeValue;
+  if(!/[\u3400-\u9fff]/.test(old))return;
+  let value=old;
+  for(const [from,to] of pairs)if(value.includes(from))value=value.split(from).join(to);
+  value=value.replace(/第([1-9])(?:形態|進化)/g,(_,n)=>n+'だんかいめのしんか');
+  // 「秒」は3年生の漢字。タイマーの目もりは数字＋ひらがなで表示する。
+  value=value.replace(/(\d+)秒/g,'$1びょう');
+  if(value!==old)node.nodeValue=value;
+ }
+ function walk(root){
+  if(root.nodeType===3){replaceText(root);return;}
+  if(root.nodeType!==1||ignoredTags.has(root.tagName))return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
+   acceptNode(node){return canEdit(node)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}
   });
-  document.querySelectorAll('body > .screen, body > .pause, section.screen').forEach(walk);
-  observer.observe(document.body,{childList:true,characterData:true,subtree:true});
+  let node;
+  while((node=walker.nextNode()))replaceText(node);
+ }
+ const observer=new MutationObserver(mutations=>{
+  for(const m of mutations){
+   if(m.type==='characterData'){replaceText(m.target);continue;}
+   for(const node of m.addedNodes)walk(node);
+  }
+ });
+ document.querySelectorAll('body > .screen, body > .pause, section.screen').forEach(walk);
+ observer.observe(document.body,{childList:true,characterData:true,subtree:true});
 })();
 </script>
 
@@ -11729,10 +11733,12 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
    const printed=Number(($('damageNumber')?.textContent||'').replace(/[^0-9.]/g,''));
    const damage=Number.isFinite(printed)&&printed>0?printed:Math.max(0,before-b.enemyHP);
    if(damage<=0)return result;
-   // MAP7の指定ボスだけ、演出の強さも「残り秒数」の攻撃力判定と一致させる。
+   // 指定MAP7ボス・古代遺跡では、演出の大・中・小も残り時間に対応。
    // 属性相性による実ダメージの倍率はこれまでどおり有効。
    const rules=BattleTimer.rules();
-   const power=rules.limit===20
+   const power=rules.limit===30
+     ? (b.elapsed<10?3:b.elapsed<20?2:1)
+     : rules.limit===20
      ? (b.elapsed<rules.hint2?3:b.elapsed<rules.answer?2:1)
      : tier(damage,actualAttackPower());
    const ally=attackTarget();
