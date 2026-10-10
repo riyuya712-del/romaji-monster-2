@@ -2349,6 +2349,25 @@ return !!(s.hero&&s.name&&s.starter);}
    07 BATTLE SUPPORT / タイマー・入力判定
    ============================================================ */
 const BattleTimer={
+ // MAP7の3つのBOSS戦のみ1問20秒。古代遺跡の専用戦は従来の10秒を維持。
+ rules(){
+  const stage=GameState.currentStage;
+  if((stage==="7-5"||stage==="7-9"||stage==="7-10") && !GameState.progress?.secretBattleActive){
+   return {limit:20,hint1:5,hint2:10,answer:15};
+  }
+  return {limit:10,hint1:3,hint2:null,answer:5};
+ },
+ updateMarks(){
+  const marks=document.querySelector("#battle .timerMarks");
+  if(!marks)return;
+  const r=this.rules();
+  // 開始時・次問のたびに現在のステージ用の時間目盛りへ更新する。
+  if(r.limit===20){
+   marks.innerHTML="<span>5秒 ヒント①</span><span>10秒 ヒント②</span><span>15秒 こたえ</span><span>20秒 ⚔️</span>";
+  }else{
+   marks.innerHTML="<span>3秒 ヒント</span><span>5秒 こたえ</span><span>10秒 ⚔️</span>";
+  }
+ },
  start(){
   this.stop();
   GameState.battle.running=true; GameState.battle.paused=false;
@@ -2368,19 +2387,26 @@ const BattleTimer={
   if(GameState.battle.timerId)clearInterval(GameState.battle.timerId);
   GameState.battle.timerId=null;GameState.battle.running=false;GameState.battle.paused=false;
  },
- reset(){GameState.battle.elapsed=0;this.render();},
+ reset(){GameState.battle.elapsed=0;this.updateMarks();this.render();},
  tick(){
   if(!GameState.battle.running)return;
-  GameState.battle.elapsed+=0.08; this.render();
-  if(GameState.battle.elapsed>=10) Battle.answerTimeout();
+  GameState.battle.elapsed+=0.08;this.render();
+  if(GameState.battle.elapsed>=this.rules().limit)Battle.answerTimeout();
  },
  render(){
   const e=GameState.battle.elapsed;
-  document.getElementById("timerBar").style.width=Math.max(0,100-e*10)+"%";
+  const r=this.rules();
+  document.getElementById("timerBar").style.width=Math.max(0,100-100*e/r.limit)+"%";
   const q=GameState.battle.queue[GameState.battle.qIndex];
   if(!q)return;
   const upperHint=String(q[1]).toUpperCase();
-  document.getElementById("hintBox").textContent=e>=5 ? "💡 "+upperHint : e>=3 ? "💡 "+upperHint[0]+"…" : "\u00a0";
+  if(r.limit===20){
+   // ヒント①: 最初の1文字、②: 前半分、15秒後: 完全なローマ字の答え。
+   const half=upperHint.slice(0,Math.max(2,Math.ceil(upperHint.length/2)));
+   document.getElementById("hintBox").textContent=e>=r.answer ? "💡 こたえ："+upperHint : e>=r.hint2 ? "💡 ヒント②："+half+"…" : e>=r.hint1 ? "💡 ヒント①："+upperHint[0]+"…" : "\u00a0";
+  }else{
+   document.getElementById("hintBox").textContent=e>=5 ? "💡 "+upperHint : e>=3 ? "💡 "+upperHint[0]+"…" : "\u00a0";
+  }
  }
 };
 
