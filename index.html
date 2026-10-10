@@ -971,6 +971,13 @@ z-index:90;opacity:0;pointer-events:none;transition:.22s ease}
 #rm2Map5Unlock .rm2M5Stage.rm2M5End .rm2M5Continue{display:block}
 #rm2Map5Unlock .rm2M5Stage.rm2M5End .rm2M5Skip{display:none}
 </style>
+<style id="rm2-training-max-combo">
+#training .rm2TrainingBonusRule{margin-top:5px;font-size:15px;font-weight:900;line-height:1.45;color:#ad7311}
+#trainingBattle .rm2TrainingCombo{max-width:calc(100% - 24px);margin:0 auto 6px;padding:5px 14px;border-radius:12px;background:#fff8db;color:#855623;font-size:clamp(15px,1.9vw,21px);font-weight:1000;line-height:1.4;text-align:center;overflow-wrap:anywhere}
+#trainingResult .rm2TrainingResultCombo{margin:12px 0;font-size:clamp(23px,3vw,29px);font-weight:1000;line-height:1.4;color:#ad7311}
+#trainingResult .rm2TrainingExpBreakdown{margin:10px 0;font-size:clamp(17px,2.3vw,22px);font-weight:900;line-height:1.4;overflow-wrap:anywhere}
+#trainingResult .rm2TrainingExpTotal{margin:16px 0;font-size:clamp(24px,3.2vw,32px);font-weight:1000;line-height:1.4;overflow-wrap:anywhere}
+</style>
 </head>
 <body>
 <!--
@@ -1300,6 +1307,7 @@ TRAINING  Training
         <div class="rm2TrainingStat">
           <div class="rm2TrainingStatLabel">⭐ けいけんち</div>
           <div class="rm2TrainingStatValue rm2TrainingExpValue">1もん <strong>+15 EXP</strong></div>
+          <div class="rm2TrainingBonusRule">さいだいコンボで ボーナス！<br>5コンボごとに +100 EXP</div>
         </div>
         <button id="trainingStart" class="rm2TrainingStartButton" type="button">とっくん スタート ▶</button>
       </div>
@@ -1450,6 +1458,7 @@ TRAINING  Training
  </div>
  <div class="hint">&nbsp;</div>
  <div id="trainingTime" style="text-align:center;font-size:24px;font-weight:1000;margin:6px 0">3:00</div>
+ <div id="trainingCombo" class="rm2TrainingCombo" role="status" aria-live="polite">コンボ 0　／　さいだい 0</div>
  <div id="trainingGauge" style="position:relative;width:min(520px,88%);height:18px;margin:2px auto 10px;border:2px solid #243047;border-radius:10px;overflow:hidden;background:#fff">
   <div id="trainingGaugeFill" style="height:100%;width:100%;background:#243047;transition:width .25s linear"></div>
   <div style="position:absolute;left:33.333%;top:0;bottom:0;width:2px;background:#fff;opacity:.95"></div>
@@ -1478,7 +1487,11 @@ TRAINING  Training
 <section id="trainingResult" class="screen">
  <div class="card">
   <h1>🏋️ 特訓終了！</h1>
-  <p id="trainingCorrectResult" style="font-size:24px;font-weight:900">せいかい　0もん</p><p id="trainingExpResult" style="font-size:24px;font-weight:900">+0 EXP</p>
+  <p id="trainingCorrectResult" style="font-size:24px;font-weight:900">せいかい　0もん</p>
+  <p id="trainingComboResult" class="rm2TrainingResultCombo">さいだい 0 コンボ</p>
+  <p id="trainingBaseExpResult" class="rm2TrainingExpBreakdown">せいかい +0 EXP</p>
+  <p id="trainingBonusResult" class="rm2TrainingExpBreakdown">コンボボーナス +0 EXP</p>
+  <p id="trainingExpResult" class="rm2TrainingExpTotal">ごうけい +0 EXP</p>
   <button id="trainingResultBack">特訓へもどる</button>
   <button id="trainingResultHome">ホームへ</button>
  </div>
@@ -4842,6 +4855,9 @@ const Training={
  answerTimerId:null,
  misses:0,
  correct:0,
+ combo:0,
+ maxCombo:0,
+ finished:false,
  locked:false,
  buildPool(){
   return [
@@ -4854,6 +4870,8 @@ const Training={
  start(){
   this.stopTimer(); this.stopQuestionTimer();
   this.seconds=180; this.misses=0; this.correct=0; this.locked=false;
+  this.combo=0; this.maxCombo=0; this.finished=false;
+  this.renderCombo();
   this.renderTime(); this.pool=this.buildPool();
   const ally=document.getElementById("trainingAllyIcon");
   if(ally) ally.textContent=Evolution.icon(GameState.selectedCompanion)||"🦁";
@@ -4874,6 +4892,20 @@ const Training={
   this.questionTimerId=setTimeout(()=>this.timeout(),10000);
   this.focus();
  },
+ renderCombo(){
+  const el=document.getElementById("trainingCombo");
+  if(el)el.textContent=`コンボ ${this.combo}　／　さいだい ${this.maxCombo}`;
+ },
+ resetCombo(){
+  this.combo=0;
+  this.renderCombo();
+ },
+ recordCorrect(){
+  this.correct++;
+  this.combo++;
+  this.maxCombo=Math.max(this.maxCombo,this.combo);
+  this.renderCombo();
+ },
  renderTime(){
   const el=document.getElementById("trainingTime");
   if(el){
@@ -4890,21 +4922,31 @@ const Training={
  },
  timeout(){
   if(!this.current||this.locked)return;
-  this.locked=true; this.stopQuestionTimer();
+  this.locked=true; this.stopQuestionTimer(); this.resetCombo();
   const f=document.getElementById("trainingFeedback");
   if(f)f.textContent=`こたえ：${String(this.current[1]||"").toUpperCase()}`;
   this.answerTimerId=setTimeout(()=>{this.answerTimerId=null;this.next();},2000);
  },
  finish(){
+  if(this.finished)return;
+  this.finished=true;
   this.stopTimer(); this.stopQuestionTimer();
   this.current=null; this.locked=true;
   const result=document.getElementById("trainingCorrectResult");
   if(result) result.textContent=`せいかい　${this.correct}もん`;
-   const gained=this.correct*15;
+   const normalExp=this.correct*15;
+   const bonusExp=Math.floor(this.maxCombo/5)*100;
+   const gained=normalExp+bonusExp;
    ExpSystem.add(gained);
    try{Save.write();}catch(e){}
    const expResult=document.getElementById("trainingExpResult");
-   if(expResult) expResult.textContent=`+${gained} EXP`;
+   if(expResult) expResult.textContent=`ごうけい +${gained} EXP`;
+   const normalResult=document.getElementById("trainingBaseExpResult");
+   if(normalResult)normalResult.textContent=`せいかい +${normalExp} EXP`;
+   const bonusResult=document.getElementById("trainingBonusResult");
+   if(bonusResult)bonusResult.textContent=`コンボボーナス +${bonusExp} EXP`;
+   const comboResult=document.getElementById("trainingComboResult");
+   if(comboResult)comboResult.textContent=`さいだい ${this.maxCombo} コンボ`;
 
   Screens.show("trainingResult");
  },
@@ -4919,7 +4961,7 @@ const Training={
    document.getElementById("trainingTyped").textContent=this.typed;
    if(f)f.innerHTML="&nbsp;";
    if(judged.status==="correct"){
-    this.correct++;
+    this.recordCorrect();
     this.locked=true; this.stopQuestionTimer();
     this.answerTimerId=setTimeout(()=>{
      this.answerTimerId=null;
@@ -4928,7 +4970,7 @@ const Training={
     },180);
    }
   }else{
-   this.misses++;
+   this.misses++; this.resetCombo();
    if(f){
     f.textContent="×";
     setTimeout(()=>{if(!this.locked&&f.textContent==="×")f.innerHTML="&nbsp;";},1000);
@@ -4942,6 +4984,7 @@ document.getElementById("trainingBattleBack").addEventListener("click",()=>{
  Training.stopQuestionTimer();
  Training.current=null;
  Training.locked=true;
+ Training.finished=true;
  Screens.show("training");
 });
 document.getElementById("trainingResultBack").addEventListener("click",()=>{
