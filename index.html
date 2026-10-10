@@ -4,12 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ローマジモンスター2</title>
-<script id="rm2-final-image-source">
+<script id="rm2-public-image-source">
 function rm2IsImageSource(value){
  return typeof value==='string'&&(value.startsWith('data:image/')||/^\.\/(?:assets\/)?[a-zA-Z0-9_.-]+\.(?:png|jpe?g|webp|gif|svg)$/.test(value));
 }
 </script>
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#dff4ff;color:#493b31}
@@ -714,10 +713,10 @@ z-index:90;opacity:0;pointer-events:none;transition:.22s ease}
 <style id="rm2-v382-question-length-layout">
 /* 長い単語・文章でもiPad横向きの中央欄に収まるよう自動調整 */
 #battle.rm2QuestionLong .kana{font-size:clamp(34px,5vw,52px)!important;line-height:1.15!important;max-width:340px;overflow-wrap:anywhere}
-#battle.rm2QuestionLong .typed{font-size:clamp(24px,3.4vw,34px)!important;width:100%!important;max-width:100%!important;overflow-wrap:anywhere;word-break:break-all}
+#battle.rm2QuestionLong .typed{font-size:clamp(24px,3.4vw,34px)!important;max-width:340px;overflow-wrap:anywhere;word-break:break-all}
 #battle.rm2QuestionSentence .problem{min-width:0!important}
 #battle.rm2QuestionSentence .kana{font-size:clamp(22px,3vw,34px)!important;line-height:1.3!important;max-width:350px;white-space:normal;overflow-wrap:anywhere}
-#battle.rm2QuestionSentence .typed{font-size:clamp(18px,2.6vw,28px)!important;line-height:1.25!important;width:100%!important;max-width:100%!important;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+#battle.rm2QuestionSentence .typed{font-size:clamp(18px,2.6vw,28px)!important;line-height:1.25!important;max-width:350px;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
 #battle.rm2QuestionLong #hintBox,#battle.rm2QuestionSentence #hintBox{overflow-wrap:anywhere;word-break:break-all}
 @media(max-width:800px){
  #battle.rm2QuestionLong .kana{font-size:34px!important;max-width:260px}
@@ -793,7 +792,7 @@ z-index:90;opacity:0;pointer-events:none;transition:.22s ease}
   }
 }
 @media (min-width:801px){
-  #battle:not(.rm2QuestionLong):not(.rm2QuestionSentence) .typed{
+  #battle .typed{
     width:auto !important;
     min-width:82px !important;
     max-width:150px !important;
@@ -909,6 +908,69 @@ z-index:90;opacity:0;pointer-events:none;transition:.22s ease}
  #training .rm2TrainingFooterText{margin-top:9px;font-size:13px}
 }
 </style>
+
+<!-- RM2 MAP5 approved unlock animation: isolated CSS and unchanged source images -->
+<style id="rm2-map5-unlock-integrated-css">
+#rm2Map5Unlock.screen{padding:0!important;min-height:100dvh;height:100dvh;overflow:hidden;background:#071528;color:#f4f7ff;align-items:center;justify-content:center;position:relative;isolation:isolate}
+#rm2Map5Unlock .rm2M5Sizer{position:relative;flex:none;}
+#rm2Map5Unlock .rm2M5Stage{position:absolute;left:0;top:0;width:1080px;height:810px;overflow:hidden;isolation:isolate;background:#071528;transform-origin:top left;}
+.rm2M5Stage{position:absolute;left:0;top:0;width:1080px;height:810px;transform-origin:top left;overflow:hidden;isolation:isolate;background:#071528}
+.rm2M5Stage .rm2M5Bg{position:absolute;inset:-1%;background-size:cover;background-position:center;transition:opacity 2s ease,transform 12s ease;will-change:opacity;}
+#rm2M5BgStart{transform:scale(1.015)}
+#rm2M5BgThunder{opacity:0;transform:scale(1.08)}
+.rm2M5Stage.rm2M5ShowThunder #rm2M5BgThunder{opacity:1;transform:scale(1.015)}
+/* Original images remain untouched: darkness and lightning are CSS overlays */
+.rm2M5Shade{position:absolute;inset:0;background:linear-gradient(to bottom,#091a38a8,#06142b70 58%,#0b17293d);opacity:0;transition:opacity 2.8s;z-index:2;pointer-events:none}
+.rm2M5Stage.rm2M5Storm .rm2M5Shade{opacity:1}
+.rm2M5Vignette{position:absolute;inset:0;z-index:3;background:radial-gradient(ellipse at 50% 43%,transparent 28%,#03122a6e 100%);pointer-events:none}
+.rm2M5Flash{position:absolute;inset:0;z-index:9;opacity:0;background:linear-gradient(120deg,#e9fafff0,#dbedff80 45%,#f8fcffdd 75%);pointer-events:none}
+.rm2M5Flash.rm2M5Fire{animation:rm2M5LightningFlash .78s ease-out 1}
+@keyframes rm2M5LightningFlash{0%,9%,18%,35%,49%,100%{opacity:0}4%{opacity:.85}14%{opacity:.35}24%{opacity:1}41%{opacity:.16}}
+.rm2M5Bolt{position:absolute;top:-35px;right:120px;width:275px;height:545px;z-index:8;opacity:0;filter:drop-shadow(0 0 14px #cdeaff) drop-shadow(0 0 36px #99baff)}
+.rm2M5Bolt.rm2M5Fire{animation:rm2M5BoltFlash .8s steps(1,end)}
+@keyframes rm2M5BoltFlash{0%,14%,30%,100%{opacity:0}5%,20%{opacity:1}35%{opacity:.38}}
+.rm2M5Hero{position:absolute;z-index:6;left:58px;bottom:142px;height:448px;width:335px;object-fit:contain;object-position:center bottom;filter:drop-shadow(6px 10px 10px #0007);opacity:0;transform:translateY(22px);transition:opacity .8s,transform 1s;pointer-events:none}
+.rm2M5Stage.rm2M5Started .rm2M5Hero{opacity:1;transform:translateY(0);animation:rm2M5HeroBreath 3s ease-in-out infinite alternate}
+.rm2M5Stage.rm2M5Revealed .rm2M5Hero{opacity:0;transform:translateX(-30px)}
+@keyframes rm2M5HeroBreath{to{filter:drop-shadow(6px 10px 10px #0007) brightness(.95)}}
+.rm2M5Voice{position:absolute;z-index:7;right:145px;top:335px;width:130px;height:130px;opacity:0;transition:opacity .4s;pointer-events:none}
+.rm2M5Voice.rm2M5Active{opacity:1}
+.rm2M5Voice .rm2M5Ring{position:absolute;inset:0;border:4px solid #d7d9ffbb;border-radius:50%;box-shadow:0 0 18px #adc9ffe0,inset 0 0 15px #a4cfff55;animation:rm2M5VoiceRing 2.2s ease-out infinite}
+.rm2M5Voice .rm2M5Ring:nth-child(2){animation-delay:.7s}.rm2M5Voice .rm2M5Ring:nth-child(3){animation-delay:1.4s}
+@keyframes rm2M5VoiceRing{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(1.8)}}
+.rm2M5Particles{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;transition:opacity .5s}
+.rm2M5Voice.rm2M5Active + .rm2M5Particles{opacity:1}
+.rm2M5Particles i{position:absolute;width:6px;height:6px;border-radius:50%;background:#eef5ff;box-shadow:0 0 13px 4px #d3dfff;opacity:.8;animation:rm2M5FloatUp 3s ease-out infinite}
+.rm2M5Particles i:nth-child(1){left:74%;top:43%}.rm2M5Particles i:nth-child(2){left:77%;top:51%;animation-delay:.7s}.rm2M5Particles i:nth-child(3){left:71%;top:46%;animation-delay:1.4s}
+@keyframes rm2M5FloatUp{to{transform:translateY(-85px) translateX(28px);opacity:0}}
+.rm2M5TopCaption{position:absolute;top:35px;left:0;right:0;z-index:11;text-align:center;font-size:19px;font-weight:950;letter-spacing:.2em;color:#ffffffd9;text-shadow:0 2px 10px #071830;opacity:.85}
+.rm2M5Dialogue{position:absolute;z-index:12;left:8%;right:8%;bottom:36px;min-height:150px;border-radius:21px;padding:21px 31px 22px 34px;background:linear-gradient(100deg,#f9fcffed,#e9f5ffec);border:3px solid #e3f6ff;box-shadow:0 13px 40px #020f248a;color:#203956;opacity:0;transform:translateY(24px);transition:opacity .45s ease,transform .45s ease}
+.rm2M5Dialogue.rm2M5Visible{opacity:1;transform:translateY(0)}
+.rm2M5Who{font-size:20px;font-weight:1000;color:#426b98;line-height:1.2;min-height:20px}
+.rm2M5Words{font-size:clamp(26px,3vw,34px);font-weight:950;letter-spacing:.03em;line-height:1.5;margin-top:10px}
+.rm2M5Dialogue.rm2M5Mystery{background:linear-gradient(120deg,#e7e7fff0,#dae1fff1);border-color:#c4ccff;color:#293268}
+.rm2M5Dialogue.rm2M5Mystery .rm2M5Who{color:#6357a0}
+.rm2M5Dialogue.rm2M5Narrator{background:linear-gradient(120deg,#f2f5ffed,#eff4ffed)}
+.rm2M5Dialogue .rm2M5GlowDot{position:absolute;right:20px;bottom:16px;color:#5e89ab;font-size:15px;opacity:.75}
+.rm2M5RevealTint{position:absolute;inset:0;z-index:10;background:linear-gradient(to bottom,#0613335c,#050e1e50);opacity:0;transition:opacity 1.8s;pointer-events:none}
+.rm2M5Stage.rm2M5Revealed .rm2M5RevealTint{opacity:1}
+.rm2M5Reveal{position:absolute;inset:0;z-index:13;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:23px;opacity:0;transform:scale(.86) translateY(20px);transition:opacity 1s ease,transform 1.5s cubic-bezier(.14,.8,.2,1);pointer-events:none}
+.rm2M5Stage.rm2M5Revealed .rm2M5Reveal{opacity:1;transform:scale(1) translateY(0)}
+.rm2M5Reveal .rm2M5Over{padding:8px 23px;background:#0a2246bf;border:1px solid #9fd4ff92;border-radius:100px;font-weight:850;font-size:24px;letter-spacing:.22em;box-shadow:0 0 26px #84bcff3d}
+.rm2M5Reveal .rm2M5MapName{font-weight:1000;font-size:72px;letter-spacing:.06em;color:#fffaf0;text-shadow:0 0 6px #fff,0 0 20px #c5d4ff,0 3px 24px #001133,0 6px 7px #011229;white-space:nowrap}
+.rm2M5Reveal .rm2M5Symbol{font-size:83px;line-height:1;filter:drop-shadow(0 0 20px #e0dbff);animation:rm2M5SymbolGlow 1.7s ease-in-out infinite alternate}
+@keyframes rm2M5SymbolGlow{to{transform:scale(1.1);filter:drop-shadow(0 0 40px #fff)}}
+.rm2M5Reveal .rm2M5Unlock{font-size:30px;font-weight:1000;padding:9px 35px;border:2px solid #fff0ae;border-radius:999px;background:linear-gradient(120deg,#a86e1cdd,#fff2a6f0,#ac7825e6);color:#3b2608;box-shadow:0 0 26px #ffe88b90,0 4px 16px #0007;opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
+.rm2M5Stage.rm2M5End .rm2M5Unlock{opacity:1;transform:translateY(0)}
+.rm2M5Stage.rm2M5End .rm2M5Reveal .rm2M5Over{background:#183d64e6}
+.rm2M5Stage .rm2M5CornerLabel{position:absolute;z-index:14;bottom:9px;right:11px;font-size:15px;color:#e4eeffb8;text-shadow:0 1px 3px #0008}
+#rm2Map5Unlock .rm2M5Skip,#rm2Map5Unlock .rm2M5Continue{position:absolute;z-index:32;cursor:pointer;touch-action:manipulation;font-weight:950}
+#rm2Map5Unlock .rm2M5Skip{top:22px;right:25px;border:1px solid #c6d4e4;background:#0b2b4dbb;color:white;border-radius:13px;padding:11px 17px;font-size:19px}
+#rm2Map5Unlock .rm2M5Continue{display:none;bottom:28px;left:50%;transform:translateX(-50%);font-size:29px;border:2px solid #fff6b5;border-radius:18px;background:#ffd34f;color:#44330a;padding:14px 48px;box-shadow:0 5px 0 #a07621,0 0 19px #ffffff77}
+#rm2Map5Unlock .rm2M5Continue:focus-visible,#rm2Map5Unlock .rm2M5Skip:focus-visible{outline:5px solid #fff;outline-offset:5px}
+#rm2Map5Unlock .rm2M5Stage.rm2M5End .rm2M5Continue{display:block}
+#rm2Map5Unlock .rm2M5Stage.rm2M5End .rm2M5Skip{display:none}
+</style>
 </head>
 <body>
 <!--
@@ -933,22 +995,29 @@ TRAINING  Training
 -->
 
 
+
+<!-- Standalone MAP5 unlock scene. Replaces old LevelMilestone Dialogue.play (not layered on top). -->
+<section id="rm2Map5Unlock" class="screen" aria-label="MAP5 かいほうイベント">
+ <div class="rm2M5Sizer" id="rm2M5Sizer"><div class="rm2M5Stage" id="rm2M5Stage">
+  <div class="rm2M5Bg" id="rm2M5BgStart"></div><div class="rm2M5Bg" id="rm2M5BgThunder"></div>
+  <div class="rm2M5Shade"></div><div class="rm2M5Vignette"></div>
+  <img class="rm2M5Hero" id="rm2M5Hero" alt="しゅじんこう">
+  <svg class="rm2M5Bolt" id="rm2M5Bolt" viewBox="0 0 260 600" aria-hidden="true"><path d="M165 -25 123 124 155 135 80 276 124 285 37 481 104 327 65 309 173 155 135 146 205 -25" fill="none" stroke="#f9ffff" stroke-width="11" stroke-linejoin="round"/><path d="M126 265 168 360 147 438" fill="none" stroke="#d8f9ff" stroke-width="6"/></svg>
+  <div class="rm2M5Flash" id="rm2M5Flash"></div>
+  <div class="rm2M5Voice" id="rm2M5Voice" aria-hidden="true"><div class="rm2M5Ring"></div><div class="rm2M5Ring"></div><div class="rm2M5Ring"></div></div>
+  <div class="rm2M5Particles"><i></i><i></i><i></i></div>
+  <div class="rm2M5TopCaption">ローマジモンスター2</div><div class="rm2M5RevealTint"></div>
+  <div class="rm2M5Dialogue" id="rm2M5Dialogue"><div class="rm2M5Who" id="rm2M5Who"></div><div class="rm2M5Words" id="rm2M5Words"></div><div class="rm2M5GlowDot">◆</div></div>
+  <div class="rm2M5Reveal"><div class="rm2M5Over">MAP 5</div><div class="rm2M5Symbol">⚡</div><div class="rm2M5MapName">らいめいの高原</div><div class="rm2M5Unlock">あたらしいマップ かいほう！</div></div>
+  <button type="button" class="rm2M5Skip" id="rm2M5Skip">スキップ ▶</button>
+  <button type="button" class="rm2M5Continue" id="rm2M5Continue">つぎへ ▶</button>
+ </div></div>
+</section>
 <section id="title" class="screen active center">
  <div class="title">ローマジ<br>モンスター2</div>
  <div class="titleSubtitle">ローマ字で、なかまと冒険しよう！</div>
  <button id="startBtn" class="bigBtn">はじめる ▶</button>
- <button id="devLv50Btn" style="display:none">🧪 Lv50テスト</button>
  <div id="continueNote" class="small" style="margin-top:16px"></div>
-</section>
-
-<section id="devLv50Test" class="screen center">
- <div class="card">
-  <h2>🧪 Lv50到達テスト</h2>
-  <p id="devLv50Status" style="font-size:22px;font-weight:900">Lv.49　あと4 EXPでLv.50</p>
-  <button id="devLv50Gain" class="bigBtn">+4 EXP ▶</button>
-  <p class="small">本番と同じ ExpSystem → LevelMilestone を通します。</p>
-  <button id="devLv50Back">← タイトル</button>
- </div>
 </section>
 
 <section id="hero" class="screen center">
@@ -1468,8 +1537,8 @@ TRAINING  Training
 </div>
 
 <script>
-const MAP1_STAGE11_DARK_SLIME='./rm2_image_001.png';
-const MAP1_STAGE11_NORMAL_SLIME='./rm2_image_002.png';
+const MAP1_STAGE11_DARK_SLIME='./assets/rm2_aec47503d897ff6685c94475080dc649d380fcc5ec888f91ad8086b2e4cf5536.png';
+const MAP1_STAGE11_NORMAL_SLIME='./assets/rm2_031dbbff6db3367107ee5f9ba689f4eea711ea969dc3db8c8791d9719ba999b5.png';
 
 "use strict";
 
@@ -2261,68 +2330,6 @@ GameState.selectedCompanion=s.selectedCompanion||"starter";
 GameState.homeCharacter=s.homeCharacter||{kind:"hero",id:"hero"};
 return !!(s.hero&&s.name&&s.starter);}
 };
-
-/* ---------- v323 story-order all-open seed (MAP5 wolf not yet joined) ----------
-   Dedicated all-open verification data.
-   Starts with MAP1〜7 unlocked so the whole game can be checked quickly,
-   including KISEKI / SECRET / TRUE END routes. */
-function seedFinalCheckV288(){
- try{
-   if(localStorage.getItem(SAVE_KEY)) return;
-   const unlockedStages=[];
-   for(let map=1;map<=6;map++){
-    for(let stage=1;stage<=5;stage++)unlockedStages.push(`${map}-${stage}`);
-   }
-   for(let stage=1;stage<=10;stage++)unlockedStages.push(`7-${stage}`);
-   const progress={
-    clearedStages:[],
-    unlockedStages,
-    homeUnlocked:true,
-    companions:["starter","second","third"],
-    discoveredMonsters:[],
-    restoredEnemyForms:{},
-    mapStorySeen:{},
-    map3StorySeen:{},
-    map4StorySeen:{},
-    stageStars:{},
-    evolutionItems:{fire:0,water:0,grass:0,map5new:0},
-    evolutionStage:{fire:3,water:3,grass:3,map5new:3},
-    bossRewardsReceived:{"1":true,"2":true,"3":true,"4":true,"5":true,"6":true},
-    bossStoryCompleted:{"1":true,"2":true,"3":true,"4":true,"5":true,"6":true},
-    map1StorySeen:{},
-    companionStorySeen:{},
-    tablets:[],
-    tabletMaps:[],
-    milestones:{level50Map5:true},
-    map2Unlocked:true,
-    map3Unlocked:true,
-    map4Unlocked:true,
-    map5Unlocked:true,
-    map6Unlocked:true,
-    map7Unlocked:true,
-    trainingUnlocked:true,
-    bossStoryUnlocked:true,
-    thirdEvolutionRewardsReceived:{"2":true,"3":true,"4":true},
-    thirdEvolutionItems:{fire:1,water:1,grass:1},
-    map5Rewards:{second:true,third:true},
-    ancientRuinsUnlocked:false,
-    trueEndingCompleted:false,
-    trueEndingInProgress:false,
-    secretBattleActive:false,
-    secretSceneActive:false,
-    normalEndingCleared:false,
-    finalRoute:""
-   };
-   localStorage.setItem(SAVE_KEY,JSON.stringify({
-    hero:"boy",name:"テスト",starter:"fire",level:50,exp:0,
-    schemaVersion:SAVE_SCHEMA_VERSION,progress,selectedCompanion:"starter",
-    homeCharacter:{kind:"hero",id:"hero"},reached:"stage"
-   }));
-  }catch(e){}
-}
-
-/* v386: 上の全解放データは手動確認用として保持。通常起動では自動実行しない。 */
-
 
 /* ---------- Timer module ---------- */
 /* ============================================================
@@ -3625,8 +3632,72 @@ if(!GameState.progress.bossStoryCompleted)GameState.progress.bossStoryCompleted=
  pending:null
 };
 
+/* MAP5 Lv50 unlock: approved animation only. Existing game data and images are reused. */
+const Map5UnlockAnim={
+ timers:[],serial:0,playing:false,done:null,
+ el(id){return document.getElementById(id);},
+ fit(){
+  const host=this.el('rm2Map5Unlock'),size=this.el('rm2M5Sizer'),stage=this.el('rm2M5Stage');
+  if(!host || !size || !stage)return;
+  const w=host.clientWidth || innerWidth,h=host.clientHeight || innerHeight;
+  const s=Math.max(.1,Math.min(w/1080,h/810));
+  size.style.width=(1080*s)+'px';size.style.height=(810*s)+'px';stage.style.transform='scale('+s+')';
+ },
+ queue(fn,ms){const sid=this.serial;this.timers.push(setTimeout(()=>{if(sid===this.serial&&this.playing)fn();},ms));},
+ thunder(){
+  const flash=this.el('rm2M5Flash'),bolt=this.el('rm2M5Bolt');
+  for(const e of [flash,bolt])e.classList.remove('rm2M5Fire');
+  void flash.offsetWidth;
+  for(const e of [flash,bolt])e.classList.add('rm2M5Fire');
+ },
+ say(who,message,type=''){
+  const dlg=this.el('rm2M5Dialogue');
+  dlg.className='rm2M5Dialogue';
+  this.el('rm2M5Voice').classList.toggle('rm2M5Active',type==='mystery');
+  this.el('rm2M5Who').textContent=who;
+  this.el('rm2M5Words').textContent=message;
+  dlg.classList.add('rm2M5Visible');
+  if(type)dlg.classList.add(type==='mystery'?'rm2M5Mystery':'rm2M5Narrator');
+ },
+ play(done){
+  if(this.playing)return;
+  this.playing=true;this.done=done;this.serial++;
+  this.timers.forEach(clearTimeout);this.timers=[];
+  const stage=this.el('rm2M5Stage'),dlg=this.el('rm2M5Dialogue');
+  stage.className='rm2M5Stage';dlg.className='rm2M5Dialogue';
+  this.el('rm2M5Words').textContent='';this.el('rm2M5Who').textContent='';
+  this.el('rm2M5Flash').classList.remove('rm2M5Fire');this.el('rm2M5Bolt').classList.remove('rm2M5Fire');
+  this.el('rm2M5Voice').classList.remove('rm2M5Active');
+  this.el('rm2M5BgStart').style.backgroundImage='url("'+RM2_ASSETS.bg1+'")';
+  this.el('rm2M5BgThunder').style.backgroundImage='url("'+RM2_ASSETS.bgThunder+'")';
+  this.el('rm2M5Hero').src=GameState.hero==='girl'?RM2_ASSETS.heroGirl:RM2_ASSETS.heroBoy;
+  Screens.show('rm2Map5Unlock');this.fit();
+  this.queue(()=>stage.classList.add('rm2M5Started'),120);
+  this.queue(()=>stage.classList.add('rm2M5Storm'),800);
+  this.queue(()=>this.thunder(),1750);
+  this.queue(()=>this.thunder(),2450);
+  this.queue(()=>this.say('','そのとき――空に大きな雷鳴がひびいた！','narrator'),2800);
+  this.queue(()=>this.say(GameState.name||'しゅじんこう','今の雷……！'),5600);
+  this.queue(()=>this.say('？？？','……たすけて……！','mystery'),8150);
+  this.queue(()=>this.say(GameState.name||'しゅじんこう','声が聞こえた！ あっちだ！'),11000);
+  this.queue(()=>{dlg.classList.remove('rm2M5Visible');this.el('rm2M5Voice').classList.remove('rm2M5Active');},13400);
+  this.queue(()=>{stage.classList.add('rm2M5ShowThunder','rm2M5Revealed');this.thunder();},13800);
+  this.queue(()=>stage.classList.add('rm2M5End'),16100);
+ },
+ finish(){
+  if(!this.playing)return;
+  this.serial++;this.timers.forEach(clearTimeout);this.timers=[];
+  this.playing=false;
+  const fn=this.done;this.done=null;
+  if(typeof fn==='function')fn();
+ }
+};
+window.addEventListener('resize',()=>{if(Map5UnlockAnim.playing)Map5UnlockAnim.fit();});
+document.getElementById('rm2M5Skip').addEventListener('click',()=>Map5UnlockAnim.finish());
+document.getElementById('rm2M5Continue').addEventListener('click',()=>Map5UnlockAnim.finish());
+
 const LevelMilestone={
- pending:false,
+ pending:false,playing:false,
  check(){
   GameState.progress=GameState.progress||{};
   GameState.progress.milestones=GameState.progress.milestones||{};
@@ -3637,17 +3708,15 @@ const LevelMilestone={
   return false;
  },
  runIfPending(fallback){
+  // Guard against duplicate clicks, old dialogue replay or multiple queued milestone calls.
+  if(this.playing)return true;
   if(!this.pending && !this.check()){ if(fallback)fallback(); return false; }
-  this.pending=false;
-  Dialogue.play([
-   {who:"",icon:"⚡",text:"そのとき――空に大きな雷鳴がひびいた！"},
-   {who:GameState.name,icon:HeroView.icon(),text:"今の雷……！"},
-   {who:"？？？",icon:"",text:"……たすけて……！"},
-   {who:GameState.name,icon:HeroView.icon(),text:"声が聞こえた！ あっちだ！"}
-  ],()=>{
+  this.pending=false;this.playing=true;
+  Map5UnlockAnim.play(()=>{
    GameState.progress.milestones.level50Map5=true;
    Progression.unlockMap5();
    Save.write();
+   this.playing=false;
    showAdventureV27();
   });
   return true;
@@ -3689,39 +3758,6 @@ const ExpSystem={
 };
 
 
-/* ---------- DevTest v144: isolated Lv50 milestone verification ----------
-   Production modules are not modified. This helper only prepares a temporary
-   save namespace and awards EXP through ExpSystem.add(). Remove as one block. */
-const DevTestV142={
- prepareLv50(){
-  GameState.hero="boy";
-  GameState.name="テスト";
-  GameState.starter="fire";
-  GameState.level=49;
-  GameState.exp=ExpSystem.needed(49)-4;
-  GameState.selectedCompanion="starter";
-  GameState.progress={
-   clearedStages:["1-1","1-2","1-3","1-4","1-5","2-1","2-2","2-3","2-4","2-5","3-1","3-2","3-3","3-4","3-5","4-1","4-2","4-3","4-4","4-5"],
-   unlockedStages:["1-1","1-2","1-3","1-4","1-5","2-1","2-2","2-3","2-4","2-5","3-1","3-2","3-3","3-4","3-5","4-1","4-2","4-3","4-4","4-5"],
-   homeUnlocked:true, companions:["fire","water","grass"], stageStars:{},
-   evolutionItems:{fire:0,water:0,grass:0}, evolutionStage:{fire:2,water:2,grass:2},
-   bossRewardsReceived:{1:true,2:true,3:true,4:true}, bossStoryCompleted:{1:true,2:true,3:true,4:true},
-   thirdEvolutionRewardsReceived:{"2":false,"3":false,"4":false}, thirdEvolutionItems:{fire:0,water:0,grass:0},
-   map2Unlocked:true,map3Unlocked:true,map4Unlocked:true,map5Unlocked:false,trainingUnlocked:true,
-   bossStoryUnlocked:true,milestones:{}
-  };
-  LevelMilestone.pending=false;
-  Save.write();
-  document.getElementById("devLv50Status").textContent=`Lv.49　あと4 EXPでLv.50`;
-  Screens.show("devLv50Test");
- },
- gain(){
-  const ups=ExpSystem.add(4);
-  Save.write();
-  document.getElementById("devLv50Status").textContent=`+4 EXP → Lv.${GameState.level}${ups?" LEVEL UP!":""}`;
-  setTimeout(()=>LevelMilestone.runIfPending(()=>{}),250);
- }
-};
 function renderMap6V156(){
  const labels={"6-1":"荒野の異変","6-2":"黒い影","6-3":"闇の足あと","6-4":"魔王の気配","6-5":"大地のマンモス"};
  ["6-1","6-2","6-3","6-4","6-5"].forEach(s=>{
@@ -4162,9 +4198,6 @@ function renderMap5V143(){
 }
 
 window.addEventListener("DOMContentLoaded",()=>{
- const a=document.getElementById("devLv50Btn"); if(a)a.onclick=()=>DevTestV142.prepareLv50();
- const b=document.getElementById("devLv50Gain"); if(b)b.onclick=()=>DevTestV142.gain();
- const c=document.getElementById("devLv50Back"); if(c)c.onclick=()=>Screens.show("title");
 });
 
 let map4CompleteEventPendingV108=false;
@@ -4591,7 +4624,7 @@ const Story={
   Screens.show("eventScene");
   EventScene.showKing();
   EventScene.showHero();
-  EventScene.dialogue(this.lines(),()=>{GameState.progress.openingSeen=true;Screens.show("starter");});
+  EventScene.dialogue(this.lines(),()=>Screens.show("starter"));
  },
  render(){},
  next(){}
@@ -7007,7 +7040,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
      {who:'魔王',text:'すべて、消し去ってくれる！'},
      {who:hero,text:'みんな、力を貸して！'},
      {who:'',text:'4体の仲間が、最後の戦いに挑む！'}
-   ],()=>{StoryEventState.mark(boss,'intro');done?.();},'魔王・最終形態');
+   ],done,'魔王・最終形態');
  };
  const defaultStart=FinalBattle710.start.bind(FinalBattle710);
  FinalBattle710.start=function(){
@@ -7067,7 +7100,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
  Battle.renderHP=function(){
    hpRender();
    if(isStage()&&FinalBattle710.mode==='front')updateParty();
-   if(isStage()&&FinalBattle710.mode==='fusion'&&ui('allyHpText'))ui('allyHpText').textContent='ひかりのモンスター\n'+ui('allyHpText').textContent;
+   if(isStage()&&FinalBattle710.mode==='fusion'&&ui('allyHpText'))ui('allyHpText').textContent='光のモンスター　'+ui('allyHpText').textContent;
  };
  // During the first phase HP is represented by four separate units.  Each mistake
  // knocks one out, independent of level-dependent ally damage and timeouts.
@@ -7388,8 +7421,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
 #preBattle.rm2Final710Pre #rm2Final710Challenge .challengers img{transform:scaleX(-1)!important;}
 /* Keep the successful word entry from showing a stale dialogue box. */
 #eventScene.rm2StoneResonance #eventDialogueBox{display:none!important;}
-#eventScene.rm2StoneResonance #eventHero,
-#eventScene.rm2StoneResonance #eventEnemy{opacity:0!important;}
+#eventScene.rm2StoneResonance #eventHero{opacity:0!important;}
 #rm2FinalStoneLayer .tablet{transition:transform 1.42s cubic-bezier(.2,.8,.2,1),opacity .45s ease;transform-origin:center center;}
 #rm2FinalStoneLayer.rm2StonesGathering .tablet{
   transform:translate(var(--stone-move-x),var(--stone-move-y)) rotate(var(--stone-rotation)) scale(.78);
@@ -7765,7 +7797,6 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   opacity:0;transition:opacity .65s ease,transform .65s ease;pointer-events:none;
 }
 #rm2NormalEndMark341.show{opacity:1;transform:translate(-50%,0)}
-#rm2NormalEndNext341{position:absolute;z-index:30;left:50%;bottom:8%;transform:translateX(-50%);min-width:160px;pointer-events:auto}
 
 @media(max-width:800px){
   #rm2NormalEndHero341{left:4%;bottom:23%;width:195px;height:230px}
@@ -7786,7 +7817,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
     document.getElementById('rm2NormalEndParty341')?.remove();
     document.getElementById('rm2NormalEndFeather341')?.remove();
     document.getElementById('rm2NormalEndMark341')?.remove();
-    document.getElementById('rm2NormalEndNext341')?.remove();
+    document.getElementById('rm2NormalEndContinue341')?.remove();
   }
 
   function makeHero341(){
@@ -7831,11 +7862,9 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
         requestAnimationFrame(()=>requestAnimationFrame(()=>mark.classList.add('show')));
       },4300);
       setTimeout(()=>{
-        if(!scene.classList.contains('rm2NormalEnd341')||!scene.classList.contains('active'))return;
-        const next=document.createElement('button');
-        next.id='rm2NormalEndNext341';next.type='button';next.className='bigBtn show';
-        next.textContent='つぎへ';
-        next.onclick=()=>{next.disabled=true;cleanup341();showAdventureV27();};
+        const next=document.createElement('button');next.id='rm2NormalEndContinue341';
+        next.type='button';next.textContent='つぎへ ▶';
+        next.addEventListener('click',()=>{next.disabled=true;cleanup341();showAdventureV27();},{once:true});
         world.appendChild(next);
       },6800);
     },780);
@@ -8138,7 +8167,7 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   const p=GameState.progress||{},keys=p.mapStorySeen||{};
   if(keys[`${stage}:${part}`])return true;
   if(stage.startsWith('1-') && part==='intro')return !!p.map1StorySeen?.[stage] || !!(p.clearedStages||[]).includes(stage);
-  if(stage==='7-10'&&part==='intro')return !!(p.clearedStages||[]).includes(stage)||p.specialDex?.fusionSeen===true;
+  if(part==='intro')return !!(p.clearedStages||[]).includes(stage);
   if(part!=='after')return false;
   if(stage==='1-2')return !!p.companionStorySeen?.second;
   if(stage==='1-3')return !!p.companionStorySeen?.third;
@@ -8156,9 +8185,11 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
  }
  function entries(){
   const list=[];
-  const progress=GameState.progress||{};
-  if(progress.openingSeen===true||(GameState.hero&&GameState.name&&GameState.starter))list.push({key:'opening:king',map:0,part:'opening',name:'おうさまとの はじまりのおはなし',type:'ぼうけんの まえ'});
+  const started=!!GameState.starter && (GameState.progress?.companions||[]).length>0;
+  if(started)list.push({key:'opening:king',map:1,part:'opening',name:'おうさまの おねがい',type:'はじまりのおはなし'});
   for(let map=1;map<=7;map++){
+   if(map===5 && GameState.progress?.milestones?.level50Map5===true)
+    list.push({key:'map5:unlock',map:5,part:'map5Unlock',name:'かみなりの こえ',type:'マップかいほう'});
    for(let st=1;st<=(map===7?10:5);st++){
     const stage=`${map}-${st}`;
     if(seen(stage,'intro')){
@@ -8169,7 +8200,6 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
    }
   }
   const p=GameState.progress||{};
-  if(p.specialDex?.fusionSeen===true||p.normalEndingCleared===true)list.push({key:'7-10:fusion',map:7,stage:'7-10',part:'fusion',name:'7-10　KISEKIから がったいへ',type:'なかまの きせき'});
   if(p.normalEndingCleared===true)list.push({key:'ending:normal',map:7,part:'endingNormal',name:'エンディング　KISEKI',type:'おもいで'});
   if(p.ancientRuinsUnlocked===true)list.push({key:'ending:secret',map:7,part:'endingSecret',name:'こだいいせきへの みち',type:'おもいで'});
   if(p.trueEndingCompleted===true)list.push({key:'ending:true',map:7,part:'endingTrue',name:'TRUE END',type:'おもいで'});
@@ -8181,28 +8211,25 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
    try{if(typeof rm2SecretCleanup369==='function')rm2SecretCleanup369()}catch(_){}
    try{if(typeof rm2NormalEndCleanup340==='function')rm2NormalEndCleanup340()}catch(_){}
    const scene=el('eventScene'),world=el('eventWorld');
-   scene?.classList.remove('rm2StoneResonance','rm2ResonanceFullPower','rm2ResonanceBurst','rm2Final710Fusion','rm2Final710Story','rm2NormalEnd341','rm2NormalEnd340','rm2SecretUnlock351','rm2SecretWall354','rm2SecretBoss369','rm2SecretBossDefeated373');
+   scene?.classList.remove('rm2NormalEnd341','rm2NormalEnd340','rm2SecretUnlock351','rm2SecretWall354','rm2SecretBoss369','rm2SecretBossDefeated373');
    world?.classList.remove('rm2TrueEndLayout391');
-   ['rm2NormalEndHero341','rm2NormalEndParty341','rm2NormalEndFeather341','rm2NormalEndMark341','rm2NormalEndNext341','rm2FinalResonanceParty','rm2StoneNarration','rm2FusionActor328','rm2NormalEndParty340','rm2NormalEndFeather340','rm2SecretWall354','rm2SecretCompleteSolo357','rm2FinalStoneLayer','rm2FinalWordGate','rm2MapMontage369','rm2TrueEndCard369','rm2TrueGuard369','rm2SecretFeather369'].forEach(id=>el(id)?.remove());
+   ['rm2NormalEndHero341','rm2NormalEndParty341','rm2NormalEndFeather341','rm2NormalEndMark341','rm2NormalEndContinue341','rm2NormalEndParty340','rm2NormalEndFeather340','rm2SecretWall354','rm2SecretCompleteSolo357','rm2FinalStoneLayer','rm2FinalWordGate','rm2MapMontage369','rm2TrueEndCard369','rm2TrueGuard369','rm2SecretFeather369'].forEach(id=>el(id)?.remove());
    if(world){world.style.backgroundImage='';world.style.backgroundSize='';world.style.backgroundPosition='';}
    try{EventScene.reset()}catch(_){}
   },
   finish(){
    if(!this.active)return;
    this.active=false;
+   if(Map5UnlockAnim.playing)Map5UnlockAnim.finish();
    const original=this.original;this.original=null;
    try{
     Screens.show=original.screensShow;
     Save.write=original.saveWrite;
     GameState.progress=original.progress;
+    GameState.level=original.level;GameState.exp=original.exp;GameState.storyIndex=original.storyIndex;
+    GameState.stars=original.stars;GameState.homeCharacter=original.homeCharacter;
     GameState.currentStage=original.stage;
     GameState.selectedCompanion=original.selectedCompanion;
-    GameState.storyIndex=original.storyIndex;
-    GameState.level=original.level;GameState.exp=original.exp;GameState.stars=original.stars;
-    GameState.hero=original.hero;GameState.name=original.name;GameState.starter=original.starter;
-    GameState.homeCharacter=original.homeCharacter;
-    Battle.start=original.battleStart;
-    FinalBattle710.resumeFusion=original.resumeFusion;
     FinalBattle710.endingStarted=original.endingStarted;
     FinalBattle710.mode=original.mode;
     FinalBattle710.active=original.finalActive;
@@ -8217,19 +8244,20 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   },
   start(entry){
    if(this.active||!entries().some(x=>x.key===entry.key))return;
-   const original={progress:GameState.progress,stage:GameState.currentStage,selectedCompanion:GameState.selectedCompanion,battle:GameState.battle,
-    storyIndex:GameState.storyIndex,level:GameState.level,exp:GameState.exp,stars:GameState.stars,hero:GameState.hero,name:GameState.name,starter:GameState.starter,homeCharacter:GameState.homeCharacter,battleStart:Battle.start,resumeFusion:FinalBattle710.resumeFusion,
+   const original={level:GameState.level,exp:GameState.exp,storyIndex:GameState.storyIndex,stars:GameState.stars,homeCharacter:GameState.homeCharacter,progress:GameState.progress,stage:GameState.currentStage,selectedCompanion:GameState.selectedCompanion,battle:GameState.battle,
     screensShow:Screens.show,saveWrite:Save.write,endingStarted:FinalBattle710.endingStarted,mode:FinalBattle710.mode,finalActive:FinalBattle710.active,finalRoute:FinalBattle710.route,finalMistakes:FinalBattle710.mistakes,finalFallen:FinalBattle710.fallen,encounterPending:Encounter.pending,encounterAfter:Encounter.pendingAfterV177};
    this.original=original;this.entry=entry;this.active=true;
    GameState.progress=JSON.parse(JSON.stringify(original.progress||{}));
    GameState.battle={...original.battle};
+   GameState.progress.trueEndingCompleted=false;
+   GameState.progress.secretBattleActive=false;GameState.progress.secretSceneActive=false;
    GameState.currentStage=entry.stage||'7-10';
    if(entry.part==='intro'){
     const p=GameState.progress;
     p.clearedStages=(p.clearedStages||[]).filter(id=>id!==entry.stage);
     if(p.mapStorySeen)delete p.mapStorySeen[`${entry.stage}:intro`];
     if(p.map1StorySeen)delete p.map1StorySeen[entry.stage];
-    if(entry.stage==='7-10'){p.ancientRuinsUnlocked=false;p.secretBattleActive=false;}
+    if(entry.stage==='7-10')p.ancientRuinsUnlocked=false;
    }else if(entry.part==='after'){
     const p=GameState.progress,stage=entry.stage,map=stage.split('-')[0];
     if(p.mapStorySeen)delete p.mapStorySeen[`${stage}:after`];
@@ -8241,26 +8269,18 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
    }
    Save.write=function(){};
    const self=this;
-   // The fusion cinematic ends at battle entry. A memory never starts combat.
-   Battle.start=function(){self.finish();};
    Screens.show=function(id){
     if(!self.active)return original.screensShow.call(this,id);
-    if(id==='eventScene'||id==='dialogue')return original.screensShow.call(this,id);
+    if(id==='eventScene'||id==='dialogue'||(id==='rm2Map5Unlock'&&entry.part==='map5Unlock'))return original.screensShow.call(this,id);
     // Leaving a story goes back to the memory list, never to gameplay.
     self.finish();
    };
    el('rm2MemoryReplayTag')?.classList.add('show');
    try{
     const done=()=>self.finish();
-    if(entry.part==='opening'){
-     Story.begin();
-    }else if(entry.part==='fusion'){
-     GameState.progress.secretBattleActive=false;
-     GameState.progress.ancientRuinsUnlocked=false;
-     GameState.progress.trueEndingCompleted=false;
-     FinalBattle710.endingStarted=false;FinalBattle710.active=false;
-     RM2_FINAL710_TEST.showTablets();
-    }else if(entry.part==='intro'){
+    if(entry.part==='opening'){Story.begin();}
+    else if(entry.part==='map5Unlock'){Map5UnlockAnim.play(done);}
+    else if(entry.part==='intro'){
      if(entry.stage.startsWith('1-')) Map1Flow.beforeStage(entry.stage,done);
      else MapStoryRouter.beforeBattle(entry.stage,done);
     }else if(entry.part==='after'){
@@ -8286,12 +8306,12 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
   if(!viewed.length){
    const empty=document.createElement('p');empty.id='rm2MemoriesEmpty';empty.textContent='まだ おもいでは ありません。\nぼうけんを すると ここに ふえていくよ！';empty.style.whiteSpace='pre-line';list.append(empty);return;
   }
-  let lastMap=-1;
+  let lastMap=0;
   for(const item of viewed){
    if(item.map!==lastMap){
     lastMap=item.map;
     const group=document.createElement('div');group.className='rm2MemoryMap';group.dataset.map=String(lastMap);
-    const heading=document.createElement('h3');heading.textContent=lastMap===0?'ぼうけんの はじまり':`MAP ${lastMap}　${mapTitle(lastMap)}`;
+    const heading=document.createElement('h3');heading.textContent=`MAP ${lastMap}　${mapTitle(lastMap)}`;
     group.append(heading);list.append(group);
    }
    const group=list.lastElementChild;
@@ -8306,7 +8326,210 @@ const auditStyle=document.createElement('style');auditStyle.textContent=`
  el('settingsMemories').addEventListener('click',()=>{render();Screens.show('rm2Memories')});
  el('rm2MemoriesBack').addEventListener('click',()=>Screens.show('settings'));
  const replayTag=document.createElement('div');replayTag.id='rm2MemoryReplayTag';replayTag.textContent='📖 おもいでを さいせいちゅう';document.body.append(replayTag);
- window.RM2_MEMORIES_TEST={entries,render,Replay};
+ window.RM2Memories={entries,render,Replay};
+})();
+</script>
+<!-- MAP 1-7 + 古代遺跡 ステージ選択画面：確定レイアウト・ネタバレなしの名称。進行ロジックは変更しない -->
+<style id="rm2-v394-stage-select-design">
+#stage.rm2StageView,#map2Stage.rm2StageView,#map3Stage.rm2StageView,#map4Stage.rm2StageView,#map5Stage.rm2StageView,#map6Stage.rm2StageView,#map7Stage.rm2StageView,#rm2SecretStageSelect.rm2StageView {
+  --rm2-s-accent:#68a86b;--rm2-s-deep:#397849;--rm2-s-pale:#e4f4e4;
+  background:radial-gradient(ellipse at 10% 95%,color-mix(in srgb,var(--rm2-s-accent) 24%,transparent),transparent 47%),linear-gradient(145deg,#edf8ff 0%,var(--rm2-s-pale) 75%,#e5f0f8 100%);
+  padding:20px!important;align-items:center;justify-content:center;min-height:100dvh;height:100dvh;overflow:hidden;
+}
+.rm2StageView>.card.rm2StageCard{
+  width:min(960px,calc(100vw - 42px))!important;max-width:960px!important;
+  height:min(760px,calc(100dvh - 42px));max-height:calc(100dvh - 42px)!important;
+  margin:auto!important;min-height:0;display:flex!important;flex-direction:column!important;
+  padding:25px 36px 24px!important;overflow:hidden!important;
+  border:2px solid #fff;border-radius:32px!important;background:#ffffffe8!important;
+  box-shadow:0 16px 48px #263e5030!important;color:#24354c;text-align:left;
+}
+.rm2StageView .rm2StageHeader{flex:0 0 auto;display:grid;grid-template-columns:110px 1fr 110px;align-items:center;gap:12px;padding-bottom:19px;border-bottom:1px solid #e2e9ef;min-height:100px}
+.rm2StageView .rm2StageHeaderTitle{text-align:center;min-width:0}
+.rm2StageView .rm2StageMapNumber{font-size:14px;font-weight:1000;letter-spacing:.16em;color:var(--rm2-s-deep);margin-bottom:4px}
+.rm2StageView .rm2StageMapTitle{font-size:35px;font-weight:1000;line-height:1.3;color:#273c53;white-space:normal}
+.rm2StageView .rm2StageHeaderDescription{font-size:14px;font-weight:800;color:#8293a6;margin-top:4px}
+.rm2StageView .rm2StageIcon{width:74px;height:66px;display:grid;place-items:center;background:var(--rm2-s-pale);border-radius:20px;font-size:33px;border:1px solid #fff;justify-self:end}
+.rm2StageView .rm2StageHeader button.rm2StageBack{width:74px;height:52px;min-width:74px;min-height:52px;display:grid!important;place-items:center;border:0!important;border-radius:14px!important;background:#edf3f7!important;color:#425974!important;font-size:30px!important;font-weight:900!important;padding:0!important;margin:0!important;box-shadow:none!important;opacity:1!important}
+.rm2StageView .rm2StageOriginalHeading{display:none!important}
+.rm2StageView .rm2StageList{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:12px;padding:20px 5px 14px;scrollbar-color:#b9c9d8 transparent;scrollbar-width:thin;width:100%}
+.rm2StageView .rm2StageList#map7StageList{display:flex;flex-direction:column;gap:12px}
+.rm2StageView .rm2StageEntry,
+#stage button[id^="stage1"].rm2StageEntry,
+#map2Stage .m2.rm2StageEntry,#map3Stage .m3.rm2StageEntry,#map4Stage .m4.rm2StageEntry{
+  flex:0 0 auto!important;width:100%!important;min-height:94px!important;height:auto;
+  display:flex;align-items:center;gap:16px;justify-content:flex-start!important;
+  border-radius:19px!important;border:2px solid #e6edf2!important;
+  background:#fff!important;color:#32465a!important;
+  padding:11px 17px!important;text-align:left!important;
+  box-shadow:0 5px 12px #17344d0d!important;font-size:18px!important;font-weight:800!important;
+  margin:0!important;opacity:1!important;white-space:normal;filter:none!important;
+}
+/* display:none は元の進行条件が決定するので、CSSで無理に解放しない */
+.rm2StageView .rm2StageEntry[style*="display: none"],.rm2StageView .rm2StageEntry[hidden]{display:none!important}
+.rm2StageView .rm2StageEntry:focus-visible{outline:3px solid #f0bc3d;outline-offset:2px}
+.rm2StageView .rm2StageEntry:active{transform:scale(.993)}
+.rm2StageView .rm2StageNum{width:96px;flex:0 0 96px;height:58px;border-radius:13px;background:var(--rm2-s-pale);color:var(--rm2-s-deep);font-weight:1000;font-size:23px;display:grid;place-items:center;white-space:nowrap}
+.rm2StageView .rm2StageText{min-width:0;display:flex;flex-direction:column;gap:5px;flex:1;justify-content:center}
+.rm2StageView .rm2StageName{font-size:23px;font-weight:1000;line-height:1.35;color:#2a3d50;overflow-wrap:anywhere}
+.rm2StageView .rm2StageRight{flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:20px}
+.rm2StageView .stageStars{float:none!important;margin:0!important;font-size:25px!important;letter-spacing:1px;line-height:1;white-space:nowrap;display:inline-flex;align-items:center;color:#a9b5c2;min-width:0}
+.rm2StageView .earnedStars{color:#f8b928!important}.rm2StageView .emptyStars{color:#a9b5c2!important}
+.rm2StageView .rm2StageArrow{color:#7b95a6;font-size:26px;font-weight:800}
+.rm2StageView .rm2StageEntry.rm2StageBoss{border-color:#f3d9c8!important;background:linear-gradient(115deg,#fff 48%,#fff8f3 100%)!important}
+.rm2StageView .rm2StageBoss .rm2StageNum{background:#ffe9db;color:#a24d21}
+.rm2StageView .rm2StageBadge{display:inline-block;padding:2px 10px;border-radius:999px;color:#a14f27;background:#ffeadc;font-size:12px;font-weight:1000;margin-left:10px;vertical-align:middle}
+.rm2StageView #map7StageList .rm2StageEntry[data-s="7-10"]{border-color:#ccb5e9!important;background:linear-gradient(115deg,#fff 45%,#f7f1ff 100%)!important}
+.rm2StageView #map7StageList .rm2StageEntry[data-s="7-10"] .rm2StageNum{background:#efe3fd;color:#67448a}
+.rm2StageView .rm2StageFootnote{font-size:13px;color:#9bacc0;text-align:center;flex:0 0 auto;padding:9px 0 0;border-top:1px solid #e8edf2;font-weight:800}
+.rm2StageView #rm2Final710RetryMessage{flex:0 0 auto!important;margin:0 0 8px!important}
+@media(max-width:800px){
+ .rm2StageView>.card.rm2StageCard{padding:16px!important;border-radius:22px!important}
+ .rm2StageView .rm2StageHeader{grid-template-columns:52px minmax(0,1fr) 52px;gap:4px;padding-bottom:12px;min-height:83px}
+ .rm2StageView .rm2StageMapTitle{font-size:clamp(17px,4vw,24px)}
+ .rm2StageView .rm2StageHeaderDescription{font-size:11px}
+ .rm2StageView .rm2StageHeader button.rm2StageBack{width:48px;height:45px;min-width:48px;min-height:45px;font-size:26px!important}
+ .rm2StageView .rm2StageIcon{width:46px;height:48px;font-size:25px}
+ .rm2StageView .rm2StageEntry{min-height:80px!important;padding:8px!important;gap:9px}
+ .rm2StageView .rm2StageNum{width:60px;flex-basis:60px;height:45px;font-size:16px}
+ .rm2StageView .rm2StageName{font-size:clamp(14px,3.5vw,20px)}
+ .rm2StageView .rm2StageRight{gap:6px}
+ .rm2StageView .stageStars{font-size:17px!important}
+ .rm2StageView .rm2StageArrow{font-size:18px}
+ .rm2StageView .rm2StageList{gap:8px;padding:10px 2px}
+}
+</style>
+<section id="rm2SecretStageSelect" class="screen center rm2StageView" aria-label="こだいいせき ステージ選択">
+ <div class="card rm2StageCard">
+  <div class="rm2StageHeader">
+   <button type="button" id="rm2SecretStageBack" class="rm2StageBack" aria-label="ぼうけんにもどる">←</button>
+   <div class="rm2StageHeaderTitle"><div class="rm2StageMapNumber">SECRET</div><div class="rm2StageMapTitle">こだいいせき</div><div class="rm2StageHeaderDescription">ステージを えらぼう</div></div>
+   <div class="rm2StageIcon">✨</div>
+  </div>
+  <div class="rm2StageList"><button type="button" class="rm2StageEntry" id="rm2SecretStageGo"><span class="rm2StageNum">SP</span><span class="rm2StageText"><span class="rm2StageName">いせきの おくで まつもの</span></span><span class="rm2StageRight"><span class="rm2StageArrow">›</span></span></button></div>
+  <div class="rm2StageFootnote">ステージを えらんで すすもう</div>
+ </div>
+</section>
+<script id="rm2-v394-stage-select-runtime">
+(function(){
+ 'use strict';
+ const NAMES={"1":["はじめての たたかい","あらたな であい","きけんな であい","やみの けはい","そうげんの いへん"],"2":["あたらしい だいち","あやしい モンスター","のこされた てがかり","ちかづく やみ","いへんの ちゅうしん"],"3":["いへんを おって","またしても あやしい けはい","つながる てがかり","みえない てき","ひそむ やみのちから"],"4":["ふかまる なぞ","おかしな モンスター","ただよう やみ","なにものかの しわざ","きこえた こえ"],"5":["かみなりの なかの こえ","こうげんに のこる あしあと","やみの ゆくえ","あらしの ちゅうしん","いなずまの けっせん"],"6":["こうやの いへん","くろい かげ","やみの あしあと","せまる けっせん","がんせきの さきに"],"7":["まおうじょうへ","やみの ついせきしゃ","どこからか ひびくこえ","かげが まちうける","しろを まもる かげ","まおうの もとへ","つよまる やみ","さいごの とびら","まおうの まえで","さいしゅう けっせん"],"secret":["いせきの おくで まつもの"]};
+ const THEMES={
+  normal:{title:'はじまりのそうげん',icon:'🌱',accent:'#68a86b',deep:'#397849',pale:'#e4f4e4'},
+  grass:{title:'しんりょくの森',icon:'🌿',accent:'#65ad73',deep:'#287348',pale:'#e1f5e7'},
+  water:{title:'あらなみ海岸',icon:'💧',accent:'#64acd9',deep:'#2673a1',pale:'#e1f3ff'},
+  fire:{title:'しゃくねつ火山',icon:'🔥',accent:'#e89a5b',deep:'#a94d29',pale:'#fff0e1'},
+  thunder:{title:'らいめいの高原',icon:'⚡',accent:'#e3bd51',deep:'#96701e',pale:'#fff7d5'},
+  earth:{title:'がんせきの荒野',icon:'🪨',accent:'#b29a74',deep:'#736347',pale:'#f4eede'},
+  dark:{title:'まおうじょう',icon:'🌙',accent:'#ab8cd1',deep:'#665098',pale:'#f1e9fa'},
+  secret:{title:'こだいいせき',icon:'✨',accent:'#aaa4ca',deep:'#595b92',pale:'#e9edf9'}
+ };
+ const SCREENS={stage:1,map2Stage:2,map3Stage:3,map4Stage:4,map5Stage:5,map6Stage:6,map7Stage:7};
+ const BACKS=['stageBack','map2Back','map3Back','map4Back','map5Back','map6Back','map7Back'];
+ function attrFor(map){
+  if(map===1)return 'normal';
+  if(map>=2&&map<=4){try{return ElementSystem.mapAttr(map+'-1')}catch(e){return 'grass'}}
+  return ({5:'thunder',6:'earth',7:'dark'})[map]||'normal';
+ }
+ function setupScreen(id,map){
+  const root=document.getElementById(id);if(!root)return;
+  const card=root.querySelector(':scope > .card');if(!card)return;
+  root.classList.add('rm2StageView');card.classList.add('rm2StageCard');
+  if(!card.querySelector('.rm2StageHeader')){
+    const oldBack=document.getElementById(BACKS[map-1]);
+    const head=document.createElement('div');head.className='rm2StageHeader';
+    if(oldBack){oldBack.classList.add('rm2StageBack');oldBack.setAttribute('aria-label','ぼうけんにもどる');head.appendChild(oldBack)}
+    const info=document.createElement('div');info.className='rm2StageHeaderTitle';
+    info.innerHTML='<div class="rm2StageMapNumber"></div><div class="rm2StageMapTitle"></div><div class="rm2StageHeaderDescription">ステージを えらぼう</div>';
+    head.appendChild(info);
+    const icon=document.createElement('div');icon.className='rm2StageIcon';head.appendChild(icon);
+    card.insertBefore(head,card.firstChild);
+    const oldH2=card.querySelector(':scope > h2');if(oldH2)oldH2.classList.add('rm2StageOriginalHeading');
+    const list=(map===7)?document.getElementById('map7StageList'):document.createElement('div');
+    list.classList.add('rm2StageList');
+    if(map!==7){
+     for(const button of [...card.querySelectorAll(':scope > button')]){if(button!==oldBack)list.appendChild(button)}
+     card.appendChild(list);
+    } else {card.appendChild(list)}
+    const foot=document.createElement('div');foot.className='rm2StageFootnote';foot.textContent=map===7?'下へ スクロールすると つづきが みられるよ':'ステージを えらんで すすもう';card.appendChild(foot);
+  }
+ }
+ function setTheme(root,theme,map){
+  const t=THEMES[theme]||THEMES.normal;
+  root.style.setProperty('--rm2-s-accent',t.accent);
+  root.style.setProperty('--rm2-s-deep',t.deep);
+  root.style.setProperty('--rm2-s-pale',t.pale);
+  const el=root.querySelector('.rm2StageHeader');if(!el)return;
+  const no=el.querySelector('.rm2StageMapNumber'),title=el.querySelector('.rm2StageMapTitle'),icon=el.querySelector('.rm2StageIcon');
+  if(no)no.textContent=map===0?'SECRET':'MAP '+map;
+  if(title)title.textContent=t.title;
+  if(icon)icon.textContent=t.icon;
+ }
+ function decorateButton(button,id,name,special){
+  // Original button remains the actual clickable node and owns its original listeners.
+  const oldStars=button.querySelector('.stageStars');
+  const wrapStars=oldStars||(()=>{
+   const wrap=document.createElement('span');wrap.className='stageStars';
+   const n=Math.max(0,Math.min(3,Number(GameState.progress?.stageStars?.[id])||0));
+   wrap.innerHTML='<span class="earnedStars">'+ '★'.repeat(n) +'</span><span class="emptyStars">'+ '☆'.repeat(3-n) +'</span>';
+   return wrap;
+  })();
+  const number=document.createElement('span');number.className='rm2StageNum';number.textContent=id;
+  const body=document.createElement('span');body.className='rm2StageText';
+  const text=document.createElement('span');text.className='rm2StageName';text.textContent=name;
+  if(special){const badge=document.createElement('span');badge.className='rm2StageBadge';badge.textContent='BOSS';text.appendChild(badge)}
+  body.appendChild(text);
+  const right=document.createElement('span');right.className='rm2StageRight';
+  const arrow=document.createElement('span');arrow.className='rm2StageArrow';arrow.textContent='›';
+  right.append(wrapStars,arrow);
+  button.replaceChildren(number,body,right);
+  button.classList.add('rm2StageEntry');button.classList.toggle('rm2StageBoss',!!special);
+  button.dataset.s=id;
+  // Keep original progress-controlled display:none unchanged.
+  if(button.style.display && button.style.display!=='none')button.style.display='flex';
+ }
+ function refresh(map){
+  const id=map===1?'stage':'map'+map+'Stage';const root=document.getElementById(id);if(!root)return;
+  setupScreen(id,map);setTheme(root,attrFor(map),map);
+  const list=root.querySelector('.rm2StageList');if(!list)return;
+  const buttons=map===7 ? [...list.querySelectorAll('button.stageCard')] : (map===1 ? [1,2,3,4,5].map(n=>document.getElementById('stage1'+n+'Btn')) : map===2||map===3||map===4 ? [...list.querySelectorAll('button[data-s]')]:[1,2,3,4,5].map(n=>document.getElementById('stage'+map+n+'Btn')));
+  let count=0;
+  for(const btn of buttons){if(!btn)continue;
+   const sid=btn.dataset.s||(btn.id?.match(/^stage(\d)(\d)Btn$/)||[]).slice(1).join('-')||(map===7 ? (((btn.textContent||'').match(/7-(?:10|[1-9])/i)||[])[0]) : '');
+   if(!sid||!/^([1-7])-([1-9]|10)$/.test(sid))continue;
+   const index=Number(sid.split('-')[1]);const name=NAMES[String(map)]?.[index-1];if(!name)continue;
+   const special=(map===7? index===9||index===10 : index===5);
+   decorateButton(btn,sid,name,special);count++;
+  }
+  root.dataset.rm2DecoratedCount=String(count);
+ }
+ // Progression.render is also called after Screens.show on MAP1 returns.
+ // Redecorate after that render so the agreed titles and stars cannot be overwritten.
+ const originalProgressionRender=Progression.render.bind(Progression);
+ Progression.render=function(){const result=originalProgressionRender();refresh(1);return result;};
+ // Preserve the existing behavior of Screens.show (including Save/UI wrappers) and simply decorate
+ // the currently requested stage screen once it has already been rendered by original code.
+ const originalShow=Screens.show.bind(Screens);
+ Screens.show=function(id){
+  const result=originalShow(id);
+  const map=SCREENS[id];if(map)refresh(map);
+  if(id==='rm2SecretStageSelect')setTheme(document.getElementById(id),'secret',0);
+  return result;
+ };
+ document.addEventListener('click',function(event){
+  const node=event.target?.closest?.('#ancientRuinsBtnV263');
+  if(!node)return;
+  if(!GameState.progress?.ancientRuinsUnlocked)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  Screens.show('rm2SecretStageSelect');
+ },true);
+ document.getElementById('rm2SecretStageBack')?.addEventListener('click',()=>showAdventureV27());
+ document.getElementById('rm2SecretStageGo')?.addEventListener('click',()=>{
+  if(GameState.progress?.ancientRuinsUnlocked===true)AncientRuinsSecretV266.enter();
+ });
+ // Build fixed headers after the original game's DOMContentLoaded handlers.
+ for(const [id,map] of Object.entries(SCREENS))setupScreen(id,map);
+ window.RM2_STAGE_SELECT_BUILD='v394_story_hints_integrated';
 })();
 </script>
 </body>
@@ -9513,10 +9736,10 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
 #battle #enemyHpText,
 #battle #allyHpText {
   box-sizing:border-box !important;
-  display:block !important;
+  display:table !important;
   max-width:96% !important;
-  min-width:0;
-  width:96%;
+  min-width:142px;
+  width:max-content;
   margin:8px auto 0 !important;
   padding:5px 13px !important;
   border-radius:999px !important;
@@ -9530,8 +9753,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   letter-spacing:.2px !important;
   text-align:center !important;
   text-shadow:0 1px 2px #0008 !important;
-  white-space:pre-line !important;
-  overflow-wrap:anywhere;
+  white-space:nowrap !important;
   opacity:1 !important;
   position:relative !important;
   z-index:3 !important;
@@ -9540,7 +9762,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   #battle .arena > div > .hp {height:13px!important;margin-top:7px!important}
   #battle #enemyHpText,#battle #allyHpText {
     font-size:15px !important;
-    min-width:0;
+    min-width:92px;
     padding:4px 7px !important;
     margin-top:5px !important;
   }
@@ -10798,7 +11020,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   },
   official(id){
    const actual=this.actualId(id);
-   return Companions.all?.[actual]?.name||actual||'モンスター';
+   return actual==='map5new'?'かみなりのオオカミ':(Companions.all?.[actual]?.name||actual||'モンスター');
   },
   custom(id){
    const actual=this.actualId(id);
@@ -10981,7 +11203,7 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
    if(!special710){
     const hp=document.getElementById('allyHpText');
     if(hp && !hp.textContent.startsWith(CompanionNicknameV392.get(GameState.selectedCompanion)+'　')){
-     hp.textContent=CompanionNicknameV392.get(GameState.selectedCompanion)+'\n'+hp.textContent;
+     hp.textContent=CompanionNicknameV392.get(GameState.selectedCompanion)+'　'+hp.textContent;
     }
    }
    return result;
@@ -11015,10 +11237,6 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
   'use strict';
   // 画面に表示された文だけ変える。セーブ、正解判定、ストーリー分岐、画像には触れない。
   const pairs = [
-    ['深まる','ふかまる'], ['声','こえ'], ['足あと','あしあと'],
-    ...['あ','か','さ','た','な','は','ま','や','ら','わ','が','ざ','だ','ば','ぱ'].map(k=>[k+'行',k+'ぎょう']),
-    ['中止','ちゅうし'], ['秒','びょう'], ['開始','はじめる'],
-    ['全て','すべて'], ['一覧','いちらん'], ['未発見','まだみつけていない'],
     ['クリアしたマップのつぎが見えるようになります。','マップをクリアすると、つぎのマップが見えるよ！'],
     ['ホームに表示するキャラ','ホームにひょうじするキャラ'],
     ['主人公や、出会ったモンスターから選べます。','しゅじんこうや、であったモンスターからえらべるよ。'],
@@ -11488,4 +11706,56 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
    return result;
  };
 })();
+</script>
+
+<style id="rm2-final-audit-text-fit">
+/* Final audit: retain the existing actors and effects; fit text to its column. */
+#battle #enemyHpText,#battle #allyHpText{
+ display:block!important;width:fit-content!important;max-width:100%!important;
+ min-width:0!important;white-space:normal!important;overflow-wrap:anywhere;
+}
+#battle .rm2HpName{display:block;line-height:1.3}
+#battle .rm2HpValue{display:block;white-space:nowrap;font-variant-numeric:tabular-nums}
+#battle.rm2QuestionLong #typed,#battle.rm2QuestionSentence #typed{
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ white-space:normal!important;overflow-wrap:anywhere;word-break:break-all;
+}
+#trainingBattle #trainingTyped{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+#rm2NormalEndContinue341{
+ position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:35;
+ border:2px solid #fff6b5;border-radius:18px;background:#ffd34f;color:#44330a;
+ padding:14px 42px;font-size:26px;font-weight:950;box-shadow:0 5px 0 #a07621;
+ cursor:pointer;touch-action:manipulation;
+}
+#rm2NormalEndContinue341:focus-visible{outline:4px solid #fff;outline-offset:5px}
+
+</style>
+<script id="rm2-final-audit-hp">
+(function(){
+ 'use strict';
+ const render=Battle.renderHP.bind(Battle);
+ Battle.renderHP=function(){
+  const result=render();
+  for(const id of ['enemyHpText','allyHpText']){
+   const label=document.getElementById(id);if(!label)continue;
+   const text=label.textContent;
+   const match=text.match(/^(.*?)\s*(HP\s+[0-9]+\s*\/\s*[0-9]+)$/);
+   if(!match)continue;
+   let name=match[1].trim();
+   // Preserve the player's chosen nickname exactly; only official UI labels use readings.
+   if(id==='allyHpText'){
+    const custom=CompanionNicknameV392.custom(GameState.selectedCompanion);
+    if(!custom)name=name.replace('雷のオオカミ','かみなりのオオカミ');
+    name=name.replace(/^光のモンスター$/,'ひかりのモンスター');
+   }
+   const value=document.createElement('span');value.className='rm2HpValue';value.textContent=match[2];
+   if(name){
+    const caption=document.createElement('span');caption.className='rm2HpName';caption.textContent=name+'　';
+    label.replaceChildren(caption,value);
+   }else label.replaceChildren(value);
+  }
+  return result;
+ };
+})();
+
 </script>
