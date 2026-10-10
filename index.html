@@ -4493,8 +4493,12 @@ const Battle={
   BattleTimer.stop();
   const player=EvolutionStats.stats(GameState.selectedCompanion,GameState.level),e=b.elapsed;
   b.attempts++;b.correctAnswers++;
-  let ratio=e<3?1:e<5?.7:.4;
-  if(e>=3)b.hints++;
+  const timeRules=BattleTimer.rules();
+  // 7-5/7-9/7-10: 残り20～10秒は大、10～5秒は中、5秒以下は小。
+  // 通常ステージは従来の3秒/5秒判定と倍率 (1/.7/.4) を維持。
+  const fullDamageUntil=timeRules.limit===20?timeRules.hint2:timeRules.hint1;
+  let ratio=e<fullDamageUntil?1:e<timeRules.answer?.7:.4;
+  if(e>=timeRules.hint1)b.hints++;
   const elementMultiplier=ElementSystem.multiplier(GameState.currentStage);
   const dmg=Math.round(player.attack*ratio*elementMultiplier);
   b.enemyHP=Math.max(0,b.enemyHP-dmg);
@@ -11725,7 +11729,12 @@ window.RM2_LAYOUT_BUILD='v310_event_dialogue_position';
    const printed=Number(($('damageNumber')?.textContent||'').replace(/[^0-9.]/g,''));
    const damage=Number.isFinite(printed)&&printed>0?printed:Math.max(0,before-b.enemyHP);
    if(damage<=0)return result;
-   const power=tier(damage,actualAttackPower());
+   // MAP7の指定ボスだけ、演出の強さも「残り秒数」の攻撃力判定と一致させる。
+   // 属性相性による実ダメージの倍率はこれまでどおり有効。
+   const rules=BattleTimer.rules();
+   const power=rules.limit===20
+     ? (b.elapsed<rules.hint2?3:b.elapsed<rules.answer?2:1)
+     : tier(damage,actualAttackPower());
    const ally=attackTarget();
    replay(ally,'rm2-fx-attack');
    replay($('enemyIcon'),'rm2-fx-hit');
