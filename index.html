@@ -3781,6 +3781,11 @@ const ExpSystem={
   if(/^1-[1-4]$/.test(stageId))return 60;
   if(stageId==="2-5")return 150;
   if(/^2-[1-4]$/.test(stageId))return 75;
+  // MAP3・4の再挑戦でも経験値が獲得できるよう、後半へ向けて段階的に増加。
+  if(stageId==="3-5")return 160;
+  if(/^3-[1-4]$/.test(stageId))return 80;
+  if(stageId==="4-5")return 180;
+  if(/^4-[1-4]$/.test(stageId))return 90;
 
   // MAP5以降は進行条件に使わないため、後半ほど少し増えるシンプルな設定。
   if(stageId==="5-5")return 200;
@@ -4388,7 +4393,8 @@ const Result={
     gained=fixedFirstExp[stageId];
     GameState.progress[expKey]=true;
    }else{
-    gained=(stageId==="1-5"||stageId==="2-5"||stageId==="3-5"||stageId==="4-5")?1:0;
+    // 再挑戦でもマップに応じた経験値を獲得。初回報酬や★4初回ボーナスはそのまま維持。
+    gained=ExpSystem.reward(stageId);
    }
   }else{
    gained=ExpSystem.reward(stageId);
